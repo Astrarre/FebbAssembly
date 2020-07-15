@@ -45,7 +45,6 @@ private val baseClassClasses = setOf(
 class ProjectContext(private val project: Project) {
     private val mcVersion = project.property("mc_version").toString()
     private val mappingsBuild = project.property("mappings_build").toString().toInt()
-
     private val febbDir = project.buildDir.resolve("febbAssembly").toPath()
     private val versionDir = febbDir.resolve(mcVersion)
     private val minecraftDir = versionDir.resolve("minecraft")
@@ -65,18 +64,22 @@ class ProjectContext(private val project: Project) {
     private val implNamedJar = abstractedDirectOutputDir.resolve("impl-named.jar")
     private val runtimeManifestProperties = abstractedDirectOutputDir.resolve("runtimeManifest.properties")
     private val abstractionManifestJson = abstractedDirectOutputDir.resolve("abstractionManifest.json")
-
     val implIntJar = abstractedDir.resolve("impl.jar")
     val apiBinariesJar = abstractedDir.resolve("api.jar")
     val apiSourcesJar = abstractedDir.resolve("api-sources.jar")
     val runtimeManifestJar = abstractedDir.resolve("runtimeManifest.jar")
     val abstractionManifestJar = abstractedDir.resolve("abstractionManifest.jar")
 
+
+    private val interfaceAbstractions = abstractedDir.resolve("interfaceRegex.lsv")
+    private val baseAbstractions = abstractedDir.resolve("baseRegex.lsv")
+
     private fun downloadIfChanged(url: String, path: Path) {
         DownloadUtil.downloadIfChanged(URL(url), path.toFile(), project.logger)
     }
 
     fun apply() {
+        JAbstractionMetadata.populate(interfaceAbstractions, baseAbstractions)
         project.task("Abstract") { task ->
             task.group = "FebbAssembly"
             task.doLast {
@@ -198,8 +201,8 @@ class ProjectContext(private val project: Project) {
                         else -> ClassAbstractionType.None
                     }
                 },
-                methods = { _, _ -> MemberAbstractionType.BaseclassAndInterface },
-                fields = { _, _ -> MemberAbstractionType.BaseclassAndInterface }
+                methods = JAbstractionMetadata::methods,
+                fields =  JAbstractionMetadata::fields
             )
         )
     }

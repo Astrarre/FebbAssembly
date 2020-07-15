@@ -37,7 +37,7 @@ private val baseClassClasses = setOf(
 )
 
 
-private class ProjectContext(private val project: Project) {
+class ProjectContext(private val project: Project) {
     private val febbDir = project.buildDir.resolve("febbAssembly").toPath()
     private val versionDir = febbDir.resolve(McVersion)
     private val minecraftDir = versionDir.resolve("minecraft")
@@ -60,12 +60,15 @@ private class ProjectContext(private val project: Project) {
     private val apiSourcesJar = abstractedDir.resolve("api-sources.jar")
     private val runtimeManifestPath = abstractedDir.resolve("runtimeManifest.properties")
     private val abstractionManifestPath = abstractedDir.resolve("abstractionManifest.json")
+    private val interfaceAbstractions = abstractedDir.resolve("interfaceRegex.lsv")
+    private val baseAbstractions = abstractedDir.resolve("baseRegex.lsv")
 
     private fun downloadIfChanged(url: String, path: Path) {
         DownloadUtil.downloadIfChanged(URL(url), path.toFile(), project.logger)
     }
 
     fun apply() {
+        JAbstractionMetadata.populate(interfaceAbstractions, baseAbstractions)
         project.task("Abstract") { task ->
             task.group = "FebbAssembly"
             task.doLast {
@@ -187,8 +190,8 @@ private class ProjectContext(private val project: Project) {
                         else -> ClassAbstractionType.None
                     }
                 },
-                methods = { _, _ -> MemberAbstractionType.BaseclassAndInterface },
-                fields = { _, _ -> MemberAbstractionType.BaseclassAndInterface }
+                methods = JAbstractionMetadata::methods,
+                fields =  JAbstractionMetadata::fields
             )
         )
     }

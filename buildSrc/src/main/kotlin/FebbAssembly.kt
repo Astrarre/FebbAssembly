@@ -17,13 +17,18 @@ import java.nio.file.Path
 import java.util.*
 
 class FebbAssembly : Plugin<Project> {
+    companion object {
+        lateinit var artifacts: ProjectContext
+    }
+
     override fun apply(project: Project) {
-        ProjectContext(project).apply()
+        ProjectContext(project).apply {
+            artifacts = this
+            apply()
+        }
     }
 }
 
-private const val McVersion = "1.16.1"
-private const val MappingsBuild = 21
 
 private val abstractedClasses = setOf(
     "net/minecraft/block/Block",
@@ -37,9 +42,12 @@ private val baseClassClasses = setOf(
 )
 
 
-private class ProjectContext(private val project: Project) {
+class ProjectContext(private val project: Project) {
+    private val mcVersion = project.property("mc_version").toString()
+    private val mappingsBuild = project.property("mappings_build").toString().toInt()
+
     private val febbDir = project.buildDir.resolve("febbAssembly").toPath()
-    private val versionDir = febbDir.resolve(McVersion)
+    private val versionDir = febbDir.resolve(mcVersion)
     private val minecraftDir = versionDir.resolve("minecraft")
     private val clientPath = minecraftDir.resolve("client.jar")
     private val serverPath = minecraftDir.resolve("server.jar")
@@ -47,19 +55,22 @@ private class ProjectContext(private val project: Project) {
     private val remappedMcPath = minecraftDir.resolve("named.jar")
     private val libsDir = versionDir.resolve("libraries")
     private val mappingsDir = versionDir.resolve("mappings")
-    private val mappingsJar = mappingsDir.resolve("yarn-build.$MappingsBuild.jar")
-    private val mappingsPath = mappingsDir.resolve("yarn-build.$MappingsBuild.tinyv2")
+    private val mappingsJar = mappingsDir.resolve("yarn-build.$mappingsBuild.jar")
+    private val mappingsPath = mappingsDir.resolve("yarn-build.$mappingsBuild.tinyv2")
     private val abstractedDir = versionDir.resolve("abstracted")
     private val abstractedDirectOutputDir = abstractedDir.resolve("directOutput")
     private val implNamedDir = abstractedDirectOutputDir.resolve("impl-named")
     private val apiBinariesDir = abstractedDirectOutputDir.resolve("api")
     private val apiSourcesDir = abstractedDirectOutputDir.resolve("api-sources")
     private val implNamedJar = abstractedDirectOutputDir.resolve("impl-named.jar")
-    private val implIntJar = abstractedDir.resolve("impl.jar")
-    private val apiBinariesJar = abstractedDir.resolve("api.jar")
-    private val apiSourcesJar = abstractedDir.resolve("api-sources.jar")
-    private val runtimeManifestPath = abstractedDir.resolve("runtimeManifest.properties")
-    private val abstractionManifestPath = abstractedDir.resolve("abstractionManifest.json")
+    private val runtimeManifestProperties = abstractedDirectOutputDir.resolve("runtimeManifest.properties")
+    private val abstractionManifestJson = abstractedDirectOutputDir.resolve("abstractionManifest.json")
+
+    val implIntJar = abstractedDir.resolve("impl.jar")
+    val apiBinariesJar = abstractedDir.resolve("api.jar")
+    val apiSourcesJar = abstractedDir.resolve("api-sources.jar")
+    val runtimeManifestJar = abstractedDir.resolve("runtimeManifest.jar")
+    val abstractionManifestJar = abstractedDir.resolve("abstractionManifest.jar")
 
     private fun downloadIfChanged(url: String, path: Path) {
         DownloadUtil.downloadIfChanged(URL(url), path.toFile(), project.logger)
@@ -70,7 +81,7 @@ private class ProjectContext(private val project: Project) {
             task.group = "FebbAssembly"
             task.doLast {
                 val versionManifest = Minecraft.downloadVersionManifest(
-                    Minecraft.downloadVersionManifestList(), McVersion
+                    Minecraft.downloadVersionManifestList(), mcVersion
                 )
                 downloadMinecraft(versionManifest)
                 downloadMcLibraries(versionManifest)
@@ -112,7 +123,7 @@ private class ProjectContext(private val project: Project) {
 
     private fun downloadMappings() {
         mappingsDir.createDirectories()
-        downloadIfChanged(Fabric.getMergedMappingsUrl(McVersion, MappingsBuild), mappingsJar)
+        downloadIfChanged(Fabric.getMergedMappingsUrl(mcVersion, mappingsBuild), mappingsJar)
         mappingsJar.openJar {
             it.getPath("mappings/mappings.tiny").copyTo(mappingsPath)
         }
@@ -174,7 +185,7 @@ private class ProjectContext(private val project: Project) {
 
     private fun createAbstractionMetadata(classpath: List<Path>): AbstractionMetadata {
         return AbstractionMetadata(
-            versionPackage = VersionPackage.fromMcVersion(McVersion),
+            versionPackage = VersionPackage.fromMcVersion(mcVersion),
             writeRawAsm = true,
             fitToPublicApi = false,
             classPath = classpath,
@@ -213,18 +224,32 @@ private class ProjectContext(private val project: Project) {
     }
 
     private fun saveManifest(manifest: AbstractionManifest, mappings: TinyTree) {
-        abstractionManifestPath.writeString(
+        abstractionManifestJson.writeString(
             Json(JsonConfiguration.Stable).stringify(AbstractionManifestSerializer, manifest)
         )
+
+        abstractionManifestJson.storeInJar(abstractionManifestJar)
 
         val namedToInt = mappings.mapNamedClassesToIntermediary()
 
         val intDotQualifiedToApi = manifest.map { (mcClassName, apiClassInfo) ->
             namedToInt.getValue(mcClassName).replace("/", ".") to apiClassInfo.apiClassName
         }
+
         Properties().apply {
             putAll(intDotQualifiedToApi)
-            Files.newOutputStream(runtimeManifestPath).use { store(it, null) }
+            Files.newOutputStream(runtimeManifestProperties).use { store(it, null) }
+        }
+
+        runtimeManifestProperties.storeInJar(runtimeManifestJar)
+
+    }
+
+    private fun Path.storeInJar(jarPath :Path){
+        jarPath.deleteIfExists()
+        jarPath.createJar()
+        jarPath.openJar {
+            copyTo(it.getPath("/$fileName"))
         }
     }
 

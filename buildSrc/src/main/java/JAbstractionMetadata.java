@@ -30,7 +30,7 @@ public class JAbstractionMetadata {
     }
 
     private static MemberAbstractionType abstraction(String desc) {
-        boolean i = INTERFACE_REGEX.stream().anyMatch(p -> p.test(desc)), b = BASE_REGEX.stream().anyMatch(p -> p.test(desc));
+        boolean i = INTERFACE_REGEX.stream().noneMatch(p -> p.test(desc)), b = BASE_REGEX.stream().noneMatch(p -> p.test(desc));
         if(i & b) {
             return MemberAbstractionType.BaseclassAndInterface;
         } else if(i) {

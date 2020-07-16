@@ -2,6 +2,7 @@ import abstractor.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonObject
+import metautils.testing.getResources
 import metautils.testing.verifyClassFiles
 import metautils.util.*
 import net.fabricmc.mapping.tree.TinyMappingFactory
@@ -11,9 +12,9 @@ import net.fabricmc.tinyremapper.OutputConsumerPath
 import net.fabricmc.tinyremapper.TinyRemapper
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import java.net.URI
 import java.net.URL
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 import java.util.*
 
 class FebbAssembly : Plugin<Project> {
@@ -41,6 +42,9 @@ private val baseClassClasses = setOf(
     "net/minecraft/entity/Entity"
 )
 
+fun getResourceInJar(resource: String) {
+
+}
 
 class ProjectContext(private val project: Project) {
     private val mcVersion = project.property("mc_version").toString()
@@ -71,15 +75,12 @@ class ProjectContext(private val project: Project) {
     val abstractionManifestJar = abstractedDir.resolve("abstractionManifest.jar")
 
 
-    private val interfaceAbstractions = abstractedDir.resolve("interfaceRegex.lsv")
-    private val baseAbstractions = abstractedDir.resolve("baseRegex.lsv")
-
     private fun downloadIfChanged(url: String, path: Path) {
         DownloadUtil.downloadIfChanged(URL(url), path.toFile(), project.logger)
     }
 
     fun apply() {
-        JAbstractionMetadata.populate(interfaceAbstractions, baseAbstractions)
+//        JAbstractionMetadata.populate(interfaceAbstractions, baseAbstractions)
         project.task("Abstract") { task ->
             task.group = "FebbAssembly"
             task.doLast {
@@ -98,6 +99,25 @@ class ProjectContext(private val project: Project) {
                 remapImplJar(classpath, mappings)
             }
         }
+//
+//        project.task("testshit") {
+//            it.doLast {
+//                val hocon = """
+//                        foo {
+//                            fields {
+//                                both = [
+//                                    foo, bar ,baz
+//                                ]
+//                            }
+//                        }
+//
+//                        bar {
+//                        }
+//    """.trimIndent()
+//
+//                println(AbstractionSelection.fromHocon(hocon))
+//            }
+//        }
     }
 
     private fun downloadMinecraft(versionManifest: JsonObject) {
@@ -187,24 +207,33 @@ class ProjectContext(private val project: Project) {
     }
 
     private fun createAbstractionMetadata(classpath: List<Path>): AbstractionMetadata {
-        return AbstractionMetadata(
-            versionPackage = VersionPackage.fromMcVersion(mcVersion),
-            writeRawAsm = true,
-            fitToPublicApi = false,
-            classPath = classpath,
-            javadocs = JavaDocs.readTiny(mappingsPath),
-            selector = TargetSelector(
-                classes = {
-                    when (it.name.toSlashQualifiedString()) {
-                        in baseClassClasses -> ClassAbstractionType.BaseclassAndInterface
-                        in abstractedClasses -> ClassAbstractionType.Interface
-                        else -> ClassAbstractionType.None
-                    }
-                },
-                methods = JAbstractionMetadata::methods,
-                fields =  JAbstractionMetadata::fields
+        getResources("interfaces.conf", "baseclasses.conf") { interfaces, baseclasses ->
+            val interfaceSelection = AbstractionSelection.fromHocon(interfaces.readToString())
+            val baseclassSelection = AbstractionSelection.fromHocon(baseclasses.readToString())
+            return AbstractionMetadata(
+                versionPackage = VersionPackage.fromMcVersion(mcVersion),
+                writeRawAsm = true,
+                fitToPublicApi = false,
+                classPath = classpath,
+                javadocs = JavaDocs.readTiny(mappingsPath),
+                selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector()
+//            TargetSelector(
+//                classes = {
+//                    when (it.name.toSlashQualifiedString()) {
+//                        in baseClassClasses -> ClassAbstractionType.BaseclassAndInterface
+//                        in abstractedClasses -> ClassAbstractionType.Interface
+//                        else -> ClassAbstractionType.None
+//                    }
+//                },
+//                methods = { _, _ -> MemberAbstractionType.BaseclassAndInterface },
+//                fields = { _, _ -> MemberAbstractionType.BaseclassAndInterface }
+////                methods = JAbstractionMetadata::methods,
+////                fields =  JAbstractionMetadata::fields
+//            )
             )
-        )
+        }
+
+
     }
 
     private fun runAbstractor(
@@ -248,7 +277,7 @@ class ProjectContext(private val project: Project) {
 
     }
 
-    private fun Path.storeInJar(jarPath :Path){
+    private fun Path.storeInJar(jarPath: Path) {
         jarPath.deleteIfExists()
         jarPath.createJar()
         jarPath.openJar {
@@ -257,3 +286,40 @@ class ProjectContext(private val project: Project) {
     }
 
 }
+
+//@PublishedApi
+//internal class DummyClass
+//
+//
+//inline fun <T> getResources(path1: String, path2: String, usage: (Path, Path) -> T): T {
+//    getResource(path1) { r1 ->
+//        getResource(path2) { r2 ->
+//            return usage(r1, r2)
+//        }
+//    }
+//}
+//
+//inline fun <T> getResource(path: String, usage: (Path) -> T): T {
+//    val classLoader = DummyClass::class.java.classLoader
+//    val uri = classLoader.getResource("dummyResource")!!.toURI()
+//    return uri.open { usage(Paths.get(uri).resolveSpecificResource(path)) }
+//}
+//
+//@PublishedApi
+//internal inline fun <T> URI.open(usage: (URI) -> T): T {
+//    return try {
+//         if (scheme == "jar") FileSystems.newFileSystem(this, null).use {
+//            usage(this)
+//        } else usage(this)
+//    } catch (e: FileSystemAlreadyExistsException) {
+//        usage(this)
+//    }
+//}
+//
+//@PublishedApi
+//internal fun Path.resolveSpecificResource(path: String) = parent.resolve(path).also {
+//    check(it.exists()) {
+//        "Resource '$this' at $it does not exist. Other resources in resources directory ${it.parent}: " + it.parent.directChildren()
+//            .toList()
+//    }
+//}

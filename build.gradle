@@ -89,8 +89,9 @@ bintray {
     publications = ["mavenJava"]
     publish = true //[Default: false] Whether version should be auto published after an upload
     pkg {
-        repo = "libs"
+        repo = "maven"
         name = "Febb-Api"
+        userOrg = "febb"
         licenses = ["mit"]
         version {
             name = totalVersion

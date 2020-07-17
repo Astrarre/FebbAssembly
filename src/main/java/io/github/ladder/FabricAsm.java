@@ -12,7 +12,7 @@ public class FabricAsm implements Runnable {
 
     private static Properties loadMcToApi() {
         Properties manifest = new Properties();
-        try (InputStream stream = FabricAsm.class.getClassLoader().getResourceAsStream("runtime-manifest.properties")) {
+        try (InputStream stream = FabricAsm.class.getClassLoader().getResourceAsStream("runtimeManifest.properties")) {
             if (stream == null) throw new IllegalStateException("Fuck resources");
             manifest.load(stream);
         } catch (IOException e) {
@@ -32,7 +32,7 @@ public class FabricAsm implements Runnable {
             String classNameInCurrentRuntime = isDev ? FabricLoader.getInstance().getMappingResolver()
                     .mapClassName("intermediary", intMcName.toString()) : intMcName.toString();
 
-            ClassTinkerers.addTransformation(classNameInCurrentRuntime, (clazz) -> clazz.interfaces.add(classNameInCurrentRuntime));
+            ClassTinkerers.addTransformation(classNameInCurrentRuntime, (clazz) -> clazz.interfaces.add(apiName.toString()));
         });
 
         System.out.println("Ladder transformation complete!");

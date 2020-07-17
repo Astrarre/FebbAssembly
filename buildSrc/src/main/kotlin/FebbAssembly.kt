@@ -92,7 +92,8 @@ class ProjectContext(private val project: Project) {
         val abstractTask = project.task("Abstract") { task ->
             task.group = "FebbAssembly"
 
-            task.inputs.properties(project.properties.filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
+            task.inputs.properties(project.properties
+                    .filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
             task.outputs.dir(abstractedDir.toFile())
             task.outputs.file(runtimeManifestProperties.toFile())
             task.outputs.dir(implNamedDest.resolve("v" + mcVersion.replace(".","_")))
@@ -209,29 +210,16 @@ class ProjectContext(private val project: Project) {
     }
 
     private fun createAbstractionMetadata(classpath: List<Path>): AbstractionMetadata {
-        getResources("interfaces.conf", "baseclasses.conf") { interfaces, baseclasses ->
+        return getResources("interfaces.conf", "baseclasses.conf") { interfaces, baseclasses ->
             val interfaceSelection = AbstractionSelection.fromHocon(interfaces.readToString())
             val baseclassSelection = AbstractionSelection.fromHocon(baseclasses.readToString())
-            return AbstractionMetadata(
+             AbstractionMetadata(
                     versionPackage = VersionPackage.fromMcVersion(mcVersion),
                     writeRawAsm = true,
                     fitToPublicApi = false,
                     classPath = classpath,
                     javadocs = JavaDocs.readTiny(mappingsPath),
                     selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector()
-//            TargetSelector(
-//                classes = {
-//                    when (it.name.toSlashQualifiedString()) {
-//                        in baseClassClasses -> ClassAbstractionType.BaseclassAndInterface
-//                        in abstractedClasses -> ClassAbstractionType.Interface
-//                        else -> ClassAbstractionType.None
-//                    }
-//                },
-//                methods = { _, _ -> MemberAbstractionType.BaseclassAndInterface },
-//                fields = { _, _ -> MemberAbstractionType.BaseclassAndInterface }
-////                methods = JAbstractionMetadata::methods,
-////                fields =  JAbstractionMetadata::fields
-//            )
             )
         }
 

@@ -21,6 +21,9 @@ dependencies {
     implementation "net.fabricmc:tiny-mappings-parser:0.3.0+build.17"
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0") // JVM dependency
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime-configparser:0.20.0") // JVM dependency
+    implementation group: 'commons-io', name: 'commons-io', version: '2.7'
+
+//    implementation("com.github.jengelman.gradle.plugins:shadow:5.2.0")
 }
 
 group 'io.github.febb'

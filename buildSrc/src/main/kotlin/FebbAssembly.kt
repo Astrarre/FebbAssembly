@@ -10,11 +10,13 @@ import net.fabricmc.mapping.tree.TinyTree
 import net.fabricmc.stitch.merge.JarMerger
 import net.fabricmc.tinyremapper.OutputConsumerPath
 import net.fabricmc.tinyremapper.TinyRemapper
+import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import java.net.URI
+import org.gradle.api.plugins.JavaPluginConvention
 import java.net.URL
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 import java.util.*
 
 class FebbAssembly : Plugin<Project> {
@@ -32,22 +34,24 @@ class FebbAssembly : Plugin<Project> {
 
 
 private val abstractedClasses = setOf(
-    "net/minecraft/block/Block",
-    "net/minecraft/entity/Entity",
-    "net/minecraft/world/World"
+        "net/minecraft/block/Block",
+        "net/minecraft/entity/Entity",
+        "net/minecraft/world/World"
 )
 
 private val baseClassClasses = setOf(
-    "net/minecraft/block/Block",
-    "net/minecraft/entity/Entity"
+        "net/minecraft/block/Block",
+        "net/minecraft/entity/Entity"
 )
 
-fun getResourceInJar(resource: String) {
-
-}
 
 class ProjectContext(private val project: Project) {
-    private val mcVersion = project.property("mc_version").toString()
+    private val sourceSets = project.convention.getPlugin(JavaPluginConvention::class.java).sourceSets
+    private val resourcesOutputDir = sourceSets.getByName("main").output.resourcesDir!!
+    private val classesOutputDir = sourceSets.getByName("main").output.classesDirs.first()
+//    final SourceSetContainer sourceSets = javaPlugin.getSourceSets();
+
+    private val mcVersion = project.property("minecraft_version").toString()
     private val mappingsBuild = project.property("mappings_build").toString().toInt()
     private val febbDir = project.buildDir.resolve("febbAssembly").toPath()
     private val versionDir = febbDir.resolve(mcVersion)
@@ -62,16 +66,21 @@ class ProjectContext(private val project: Project) {
     private val mappingsPath = mappingsDir.resolve("yarn-build.$mappingsBuild.tinyv2")
     private val abstractedDir = versionDir.resolve("abstracted")
     private val abstractedDirectOutputDir = abstractedDir.resolve("directOutput")
-    private val implNamedDir = abstractedDirectOutputDir.resolve("impl-named")
     private val apiBinariesDir = abstractedDirectOutputDir.resolve("api")
     private val apiSourcesDir = abstractedDirectOutputDir.resolve("api-sources")
-    private val implNamedJar = abstractedDirectOutputDir.resolve("impl-named.jar")
-    private val runtimeManifestProperties = abstractedDirectOutputDir.resolve("runtimeManifest.properties")
+
+    //    private val implNamedJar = abstractedDirectOutputDir.resolve("impl-named.jar")
     private val abstractionManifestJson = abstractedDirectOutputDir.resolve("abstractionManifest.json")
-    val implIntJar = abstractedDir.resolve("impl.jar")
+//    val implIntJar = abstractedDir.resolve("impl.jar")
+
+    private val implNamedDir = abstractedDirectOutputDir.resolve("impl-named")
+
+    val implNamedDest = classesOutputDir.toPath()
     val apiBinariesJar = abstractedDir.resolve("api.jar")
     val apiSourcesJar = abstractedDir.resolve("api-sources.jar")
-    val runtimeManifestJar = abstractedDir.resolve("runtimeManifest.jar")
+    val runtimeManifestProperties = resourcesOutputDir.resolve("runtimeManifest.properties").toPath()
+
+    //    val runtimeManifestJar = abstractedDir.resolve("runtimeManifest.jar")
     val abstractionManifestJar = abstractedDir.resolve("abstractionManifest.jar")
 
 
@@ -80,12 +89,16 @@ class ProjectContext(private val project: Project) {
     }
 
     fun apply() {
-//        JAbstractionMetadata.populate(interfaceAbstractions, baseAbstractions)
-        project.task("Abstract") { task ->
+        val abstractTask = project.task("Abstract") { task ->
             task.group = "FebbAssembly"
+
+            task.inputs.properties(project.properties.filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
+            task.outputs.dir(abstractedDir.toFile())
+            task.outputs.file(runtimeManifestProperties.toFile())
+            task.outputs.dir(implNamedDest.resolve("v" + mcVersion.replace(".","_")))
             task.doLast {
                 val versionManifest = Minecraft.downloadVersionManifest(
-                    Minecraft.downloadVersionManifestList(), mcVersion
+                        Minecraft.downloadVersionManifestList(), mcVersion
                 )
                 downloadMinecraft(versionManifest)
                 downloadMcLibraries(versionManifest)
@@ -96,28 +109,17 @@ class ProjectContext(private val project: Project) {
                 remapMinecraftJar(classpath, mappings)
 
                 abstractMinecraft(classpath, mappings)
-                remapImplJar(classpath, mappings)
+                FileUtils.copyDirectory(implNamedDir.toFile(), implNamedDest.toFile())
+//                remapImplJar(classpath, mappings)
             }
         }
-//
-//        project.task("testshit") {
-//            it.doLast {
-//                val hocon = """
-//                        foo {
-//                            fields {
-//                                both = [
-//                                    foo, bar ,baz
-//                                ]
-//                            }
-//                        }
-//
-//                        bar {
-//                        }
-//    """.trimIndent()
-//
-//                println(AbstractionSelection.fromHocon(hocon))
-//            }
-//        }
+
+        project.tasks.getByName("processResources").dependsOn(abstractTask)
+        project.tasks.getByName("classes").dependsOn(abstractTask)
+
+//        project.tasks.getByName("shadowJar").dependsOn(abstractTask)
+//        //TODO: don't use shadow, just copy over
+//        project.dependencies.add("shadow", project.files(implNamedJar.toAbsolutePath().toString()))
     }
 
     private fun downloadMinecraft(versionManifest: JsonObject) {
@@ -154,39 +156,39 @@ class ProjectContext(private val project: Project) {
 
     private fun remapMinecraftJar(classpath: List<Path>, mappings: TinyTree) {
         remap(
-            mappings,
-            classpath,
-            fromNamespace = "official",
-            toNamespace = "named",
-            fromPath = mergedPath,
-            toPath = remappedMcPath
+                mappings,
+                classpath,
+                fromNamespace = "official",
+                toNamespace = "named",
+                fromPath = mergedPath,
+                toPath = remappedMcPath
         )
     }
 
-    private fun remapImplJar(classpath: List<Path>, mappings: TinyTree) {
-        remap(
-            mappings,
-            classpath,
-            fromNamespace = "named",
-            toNamespace = "intermediary",
-            fromPath = implNamedJar,
-            toPath = implIntJar
-        )
-    }
+//    private fun remapImplJar(classpath: List<Path>, mappings: TinyTree) {
+//        remap(
+//            mappings,
+//            classpath,
+//            fromNamespace = "named",
+//            toNamespace = "intermediary",
+//            fromPath = implNamedJar,
+//            toPath = implIntJar
+//        )
+//    }
 
     private fun remap(
-        mappings: TinyTree,
-        classpath: List<Path>,
-        fromNamespace: String,
-        toNamespace: String,
-        fromPath: Path,
-        toPath: Path
+            mappings: TinyTree,
+            classpath: List<Path>,
+            fromNamespace: String,
+            toNamespace: String,
+            fromPath: Path,
+            toPath: Path
     ) {
         val remapper = TinyRemapper.newRemapper()
-            .withMappings(TinyRemapperMappingsHelper.create(mappings, fromNamespace, toNamespace, true))
-            .renameInvalidLocals(true)
-            .rebuildSourceFilenames(true)
-            .build()
+                .withMappings(TinyRemapperMappingsHelper.create(mappings, fromNamespace, toNamespace, true))
+                .renameInvalidLocals(true)
+                .rebuildSourceFilenames(true)
+                .build()
 
         OutputConsumerPath.Builder(toPath).build().use { outputConsumer ->
             outputConsumer.addNonClassFiles(fromPath)
@@ -197,8 +199,8 @@ class ProjectContext(private val project: Project) {
     }
 
     private fun abstractMinecraft(
-        classpath: List<Path>,
-        mappings: TinyTree
+            classpath: List<Path>,
+            mappings: TinyTree
     ) {
         assert(remappedMcPath.exists())
         val metadata = createAbstractionMetadata(classpath)
@@ -211,12 +213,12 @@ class ProjectContext(private val project: Project) {
             val interfaceSelection = AbstractionSelection.fromHocon(interfaces.readToString())
             val baseclassSelection = AbstractionSelection.fromHocon(baseclasses.readToString())
             return AbstractionMetadata(
-                versionPackage = VersionPackage.fromMcVersion(mcVersion),
-                writeRawAsm = true,
-                fitToPublicApi = false,
-                classPath = classpath,
-                javadocs = JavaDocs.readTiny(mappingsPath),
-                selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector()
+                    versionPackage = VersionPackage.fromMcVersion(mcVersion),
+                    writeRawAsm = true,
+                    fitToPublicApi = false,
+                    classPath = classpath,
+                    javadocs = JavaDocs.readTiny(mappingsPath),
+                    selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector()
 //            TargetSelector(
 //                classes = {
 //                    when (it.name.toSlashQualifiedString()) {
@@ -237,8 +239,8 @@ class ProjectContext(private val project: Project) {
     }
 
     private fun runAbstractor(
-        metadata: AbstractionMetadata,
-        classpath: List<Path>
+            metadata: AbstractionMetadata,
+            classpath: List<Path>
     ): AbstractionManifest {
         abstractedDirectOutputDir.createDirectories()
         val manifest = Abstractor.parse(mcJar = remappedMcPath, metadata = metadata) {
@@ -249,7 +251,7 @@ class ProjectContext(private val project: Project) {
         }
 
         verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath))
-        implNamedDir.convertDirToJar(implNamedJar)
+//        implNamedDir.convertDirToJar(implNamedJar)
         apiBinariesDir.convertDirToJar(apiBinariesJar)
         apiSourcesDir.convertDirToJar(apiSourcesJar)
         return manifest
@@ -257,7 +259,7 @@ class ProjectContext(private val project: Project) {
 
     private fun saveManifest(manifest: AbstractionManifest, mappings: TinyTree) {
         abstractionManifestJson.writeString(
-            Json(JsonConfiguration.Stable).stringify(AbstractionManifestSerializer, manifest)
+                Json(JsonConfiguration.Stable).stringify(AbstractionManifestSerializer, manifest)
         )
 
         abstractionManifestJson.storeInJar(abstractionManifestJar)
@@ -273,7 +275,7 @@ class ProjectContext(private val project: Project) {
             Files.newOutputStream(runtimeManifestProperties).use { store(it, null) }
         }
 
-        runtimeManifestProperties.storeInJar(runtimeManifestJar)
+//        runtimeManifestProperties.storeInJar(runtimeManifestJar)
 
     }
 
@@ -286,40 +288,3 @@ class ProjectContext(private val project: Project) {
     }
 
 }
-
-//@PublishedApi
-//internal class DummyClass
-//
-//
-//inline fun <T> getResources(path1: String, path2: String, usage: (Path, Path) -> T): T {
-//    getResource(path1) { r1 ->
-//        getResource(path2) { r2 ->
-//            return usage(r1, r2)
-//        }
-//    }
-//}
-//
-//inline fun <T> getResource(path: String, usage: (Path) -> T): T {
-//    val classLoader = DummyClass::class.java.classLoader
-//    val uri = classLoader.getResource("dummyResource")!!.toURI()
-//    return uri.open { usage(Paths.get(uri).resolveSpecificResource(path)) }
-//}
-//
-//@PublishedApi
-//internal inline fun <T> URI.open(usage: (URI) -> T): T {
-//    return try {
-//         if (scheme == "jar") FileSystems.newFileSystem(this, null).use {
-//            usage(this)
-//        } else usage(this)
-//    } catch (e: FileSystemAlreadyExistsException) {
-//        usage(this)
-//    }
-//}
-//
-//@PublishedApi
-//internal fun Path.resolveSpecificResource(path: String) = parent.resolve(path).also {
-//    check(it.exists()) {
-//        "Resource '$this' at $it does not exist. Other resources in resources directory ${it.parent}: " + it.parent.directChildren()
-//            .toList()
-//    }
-//}

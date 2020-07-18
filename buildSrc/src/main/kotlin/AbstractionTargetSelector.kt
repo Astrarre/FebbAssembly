@@ -7,7 +7,7 @@ import metautils.util.applyIf
 
 
 data class AbstractionSelections(val interfaces: AbstractionSelection, val baseclasses: AbstractionSelection) {
-    fun toTargetSelector() : TargetSelector{
+    fun toTargetSelector() : TargetSelector {
         val compiledInterfaces = interfaces.compile()
         val compiledBaseclasses = baseclasses.compile()
 
@@ -54,7 +54,10 @@ data class AbstractionSelections(val interfaces: AbstractionSelection, val basec
         classApi: ClassApi, selections: CompiledAbstractionSelection,
         memberSelectionsProperty: (CompiledAbstractedClass) -> List<Regex>?
     ): Boolean {
-        val classSelection = classApi.getSelection(selections) ?: return false
+        val classSelection = classApi.getSelection(selections)
+        // If the class is not selected then abstractor will take care of not abstracting it and its members itself,
+        // but abstractor does some optimizations so it's better to leave it up to it
+                ?: return true
         val memberSelections = memberSelectionsProperty(classSelection) ?: return true
         return memberSelections.any { it.matches(this) }
     }

@@ -69,18 +69,16 @@ class ProjectContext(private val project: Project) {
     private val apiBinariesDir = abstractedDirectOutputDir.resolve("api")
     private val apiSourcesDir = abstractedDirectOutputDir.resolve("api-sources")
 
-    //    private val implNamedJar = abstractedDirectOutputDir.resolve("impl-named.jar")
     private val abstractionManifestJson = abstractedDirectOutputDir.resolve("abstractionManifest.json")
-//    val implIntJar = abstractedDir.resolve("impl.jar")
 
     private val implNamedDir = abstractedDirectOutputDir.resolve("impl-named")
 
-    val implNamedDest = classesOutputDir.toPath()
+    private val runtimeManifestProperties = resourcesOutputDir.resolve("runtimeManifest.properties").toPath()
+    private val implNamedDest = classesOutputDir.toPath()
+    private val apiForDevTesting = project.file("dev/test-api.jar").toPath()
     val apiBinariesJar = abstractedDir.resolve("api.jar")
     val apiSourcesJar = abstractedDir.resolve("api-sources.jar")
-    val runtimeManifestProperties = resourcesOutputDir.resolve("runtimeManifest.properties").toPath()
 
-    //    val runtimeManifestJar = abstractedDir.resolve("runtimeManifest.jar")
     val abstractionManifestJar = abstractedDir.resolve("abstractionManifest.jar")
 
 
@@ -95,8 +93,9 @@ class ProjectContext(private val project: Project) {
             task.inputs.properties(project.properties
                     .filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
             task.outputs.dir(abstractedDir.toFile())
-            task.outputs.file(runtimeManifestProperties.toFile())
             task.outputs.dir(implNamedDest.resolve("v" + mcVersion.replace(".","_")))
+            task.outputs.file(runtimeManifestProperties.toFile())
+            task.outputs.file(apiForDevTesting.toFile())
             task.doLast {
                 val versionManifest = Minecraft.downloadVersionManifest(
                         Minecraft.downloadVersionManifestList(), mcVersion
@@ -110,17 +109,22 @@ class ProjectContext(private val project: Project) {
                 remapMinecraftJar(classpath, mappings)
 
                 abstractMinecraft(classpath, mappings)
-                FileUtils.copyDirectory(implNamedDir.toFile(), implNamedDest.toFile())
-//                remapImplJar(classpath, mappings)
+                copyImplToClassesDir()
+                copyApiForTestingInDev()
             }
         }
 
         project.tasks.getByName("processResources").dependsOn(abstractTask)
         project.tasks.getByName("classes").dependsOn(abstractTask)
+    }
 
-//        project.tasks.getByName("shadowJar").dependsOn(abstractTask)
-//        //TODO: don't use shadow, just copy over
-//        project.dependencies.add("shadow", project.files(implNamedJar.toAbsolutePath().toString()))
+    private fun copyApiForTestingInDev() {
+        apiForDevTesting.createParentDirectories()
+        apiBinariesJar.copyTo(apiForDevTesting)
+    }
+
+    private fun copyImplToClassesDir() {
+        FileUtils.copyDirectory(implNamedDir.toFile(), implNamedDest.toFile())
     }
 
     private fun downloadMinecraft(versionManifest: JsonObject) {

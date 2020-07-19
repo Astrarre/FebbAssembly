@@ -1,25 +1,22 @@
 {
   "schemaVersion": 1,
-  "id": "ladder-impl-fabric",
+  "id": "iridis-impl-fabric",
   "version": "${version}",
 
-  "name": "Ladder for Fabric",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Iridis for Fabric",
+  "description": "Allows running Iridis mods that will be automatically compatible with Minecraft in future versions.",
   "authors": [
-    "Me!"
+    "IridisMC!"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/IridisMC/FebbAssembly",
+    "sources": "https://github.com/IridisMC/FebbAssembly"
   },
 
-  "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
+  "license": "MIT",
+  "icon": "assets/iridis-impl-fabric/icon.png",
 
   "environment": "*",
-  "mixins": [
-    "ladder-impl-fabric.mixins.json"
-  ],
   "entrypoints": {
     "mm:early_risers": [
       "io.github.ladder.FabricAsm"
@@ -27,8 +24,5 @@
   },
   "depends": {
     "fabricloader": ">=0.7.4"
-  },
-  "suggests": {
-    "flamingo": "*"
   }
 }

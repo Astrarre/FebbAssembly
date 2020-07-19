@@ -29,8 +29,6 @@ public class FabricAsm implements Runnable {
 
         final Properties mcToApi = loadMcToApi();
 
-//        IBlockEntity
-
         boolean isDev = FabricLoader.getInstance().isDevelopmentEnvironment();
         mcToApi.forEach((intMcName, apiName) -> {
             String classNameInCurrentRuntime = isDev ? FabricLoader.getInstance().getMappingResolver()

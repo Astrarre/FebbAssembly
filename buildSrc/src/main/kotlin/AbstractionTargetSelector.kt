@@ -2,7 +2,6 @@ import abstractor.ClassAbstractionType
 import abstractor.MemberAbstractionType
 import abstractor.TargetSelector
 import metautils.api.ClassApi
-import metautils.api.uniqueIdentifier
 import metautils.util.applyIf
 
 
@@ -33,11 +32,11 @@ data class AbstractionSelections(val interfaces: AbstractionSelection, val basec
                     else -> ClassAbstractionType.None
                 }
             },
-            fields = { classApi, field ->
-                field.name.selectedAbstractionType(classApi) { it.fields }
+            fields = {  field ->
+                field.name.selectedAbstractionType(field.classIn) { it.fields }
             },
-            methods = { classApi, method ->
-                method.uniqueIdentifier().selectedAbstractionType(classApi) { it.methods }
+            methods = {  method ->
+                method.locallyUniqueIdentifier.selectedAbstractionType(method.classIn) { it.methods }
             }
         )
     }
@@ -71,7 +70,7 @@ private fun AbstractionSelection.compile(): CompiledAbstractionSelection = value
 
 private typealias CompiledAbstractedPackage = List<Pair<Regex, CompiledAbstractedClass>>
 
-private fun AbstractedPackage.compile(): CompiledAbstractedPackage = map { (k, v) -> k.toRegex(v.regex) to v.compile() }
+private fun AbstractedPackage.compile(): CompiledAbstractedPackage = map { (k, v) -> k.toRegex( v.regex) to v.compile() }
 
 private class CompiledAbstractedClass(
     val fields: List<Regex>? = null,
@@ -81,5 +80,5 @@ private class CompiledAbstractedClass(
 private fun AbstractedClass.compile() = CompiledAbstractedClass(fields.compile(regex), methods.compile(regex))
 private fun List<String>?.compile(regex: Boolean) = this?.map { it.toRegex(regex) }
 
-private fun String.toRegex(isRegex: Boolean) = applyIf(!isRegex) { "^$this\$" }.toRegex()
+private fun String.toRegex(isRegex: Boolean) = applyIf(!isRegex) { "^${Regex.escape(this)}\$" }.toRegex()
 

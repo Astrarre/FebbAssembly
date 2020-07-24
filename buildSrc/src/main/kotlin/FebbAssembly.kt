@@ -75,6 +75,8 @@ class ProjectContext(private val project: Project) {
 
     private val runtimeManifestProperties = resourcesOutputDir.resolve("runtimeManifest.properties").toPath()
     private val implNamedDest = classesOutputDir.toPath()
+    private val currentVersionAbstractedDirInClasses = implNamedDest.resolve("v" + mcVersion.replace(".","_"))
+
     private val apiForDevTesting = project.file("dev/test-api.jar").toPath()
     val apiBinariesJar = abstractedDir.resolve("api.jar")
     val apiSourcesJar = abstractedDir.resolve("api-sources.jar")
@@ -87,13 +89,15 @@ class ProjectContext(private val project: Project) {
     }
 
     fun apply() {
+//        JavaPlugin.CLASSES_TASK_NAME
+//        val x: Classes
         val abstractTask = project.task("Abstract") { task ->
             task.group = "FebbAssembly"
 
             task.inputs.properties(project.properties
                     .filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
             task.outputs.dir(abstractedDir.toFile())
-            task.outputs.dir(implNamedDest.resolve("v" + mcVersion.replace(".","_")))
+            task.outputs.dir(currentVersionAbstractedDirInClasses.toFile())
             task.outputs.file(runtimeManifestProperties.toFile())
             task.outputs.file(apiForDevTesting.toFile())
             task.doLast {
@@ -124,6 +128,8 @@ class ProjectContext(private val project: Project) {
     }
 
     private fun copyImplToClassesDir() {
+        classesOutputDir.deleteRecursively()
+//        currentVersionAbstractedDirInClasses.deleteRecursively()
         FileUtils.copyDirectory(implNamedDir.toFile(), implNamedDest.toFile())
     }
 

@@ -3,7 +3,6 @@ package io.github.ladder;
 import com.chocohead.mm.api.ClassTinkerers;
 import net.fabricmc.loader.api.FabricLoader;
 import v1_16_1.net.minecraft.block.IBlock;
-import v1_16_1.net.minecraft.block.entity.IBlockEntity;
 
 import java.io.IOException;
 import java.io.InputStream;

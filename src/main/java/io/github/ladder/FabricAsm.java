@@ -2,7 +2,6 @@ package io.github.ladder;
 
 import com.chocohead.mm.api.ClassTinkerers;
 import net.fabricmc.loader.api.FabricLoader;
-import v1_16_1.net.minecraft.block.IBlock;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,20 +23,21 @@ public class FabricAsm implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Attaching Ladder API to Minecraft...");
-
-        final Properties mcToApi = loadMcToApi();
 
         boolean isDev = FabricLoader.getInstance().isDevelopmentEnvironment();
-        mcToApi.forEach((intMcName, apiName) -> {
-            String classNameInCurrentRuntime = isDev ? FabricLoader.getInstance().getMappingResolver()
-                    .mapClassName("intermediary", intMcName.toString()) : intMcName.toString();
+        if (!isDev) {
+            System.out.println("Attaching Ladder API to Minecraft...");
 
-            ClassTinkerers.addTransformation(classNameInCurrentRuntime, (clazz) -> clazz.interfaces.add(apiName.toString()));
-        });
+            final Properties mcToApi = loadMcToApi();
 
-        System.out.println("Ladder transformation complete!");
+            mcToApi.forEach((intMcName, apiName) -> {
+                String classNameInCurrentRuntime = intMcName.toString();
 
+                ClassTinkerers.addTransformation(classNameInCurrentRuntime, (clazz) -> clazz.interfaces.add(apiName.toString()));
+            });
+
+            System.out.println("Ladder transformation complete!");
+        }
 
     }
 }

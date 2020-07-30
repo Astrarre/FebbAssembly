@@ -1,0 +1,104 @@
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
+plugins {
+    id("fabric-loom") version ("0.4-SNAPSHOT")
+    id("maven-publish")
+    id("com.dorongold.task-tree") version "1.5"
+    id "com.jfrog.bintray" version "1.8.5"
+}
+
+
+repositories {
+    maven { url = "https://dl.bintray.com/febb/maven" }
+}
+
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+apply plugin: FebbAssembly
+
+def totalVersion = "$minecraft_version+$mappings_build-$api_build"
+
+group 'io.github.febb'
+version totalVersion
+archivesBaseName = "api"
+
+
+
+dependencies {
+    minecraft("com.mojang:minecraft:$minecraft_version")
+    mappings("net.fabricmc:yarn:$minecraft_version+build.$mappings_build:v2")
+    modImplementation("net.fabricmc:fabric-loader:$loader_version")
+    modImplementation("io.github.febb:fabric-asm:2.0.1")
+    include("io.github.febb:fabric-asm:2.0.1")
+    compileOnly(files("dev/test-api.jar"))
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include "fabric.mod.json"
+        expand "version": project.version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude "fabric.mod.json"
+    }
+}
+
+
+// configure the maven publication
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+
+            groupId 'io.github.febb'
+            artifactId "api"
+            version totalVersion
+
+            def artifacts = FebbAssembly.Companion.artifacts
+
+            artifact(remapJar){
+                builtBy remapJar
+                classifier "impl-fabric"
+            }
+
+            artifact(artifacts.apiBinariesJar){
+                classifier "api"
+            }
+
+            artifact(artifacts.apiSourcesJar){
+                classifier "api-sources"
+            }
+
+            artifact(artifacts.abstractionManifestJar){
+                classifier "dev-manifest"
+            }
+        }
+    }
+}
+
+
+
+bintray {
+    user = project.hasProperty('bintray_user') ? project.property('bintray_user') : ""
+    key = project.hasProperty('bintray_api_key') ? project.property('bintray_api_key') : ""
+    publications = ["mavenJava"]
+    publish = true //[Default: false] Whether version should be auto published after an upload
+    pkg {
+        repo = "maven"
+        name = "Febb-Api"
+        userOrg = "febb"
+        licenses = ["mit"]
+        version {
+            name = totalVersion
+            released = new Date()
+        }
+    }
+
+}

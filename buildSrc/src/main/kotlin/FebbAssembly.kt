@@ -2,7 +2,7 @@ import abstractor.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import kotlinx.serialization.json.JsonObject
-import metautils.testing.getResources
+import metautils.testing.getResource
 import metautils.testing.verifyClassFiles
 import metautils.util.*
 import net.fabricmc.mapping.tree.TinyMappingFactory
@@ -18,6 +18,7 @@ import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
+import kotlin.collections.HashMap
 
 class FebbAssembly : Plugin<Project> {
     companion object {
@@ -31,18 +32,6 @@ class FebbAssembly : Plugin<Project> {
         }
     }
 }
-
-
-private val abstractedClasses = setOf(
-        "net/minecraft/block/Block",
-        "net/minecraft/entity/Entity",
-        "net/minecraft/world/World"
-)
-
-private val baseClassClasses = setOf(
-        "net/minecraft/block/Block",
-        "net/minecraft/entity/Entity"
-)
 
 
 class ProjectContext(private val project: Project) {
@@ -112,7 +101,7 @@ class ProjectContext(private val project: Project) {
                 val mappings = Files.newBufferedReader(mappingsPath).use { TinyMappingFactory.load(it) }
                 remapMinecraftJar(classpath, mappings)
 
-                abstractMinecraft(classpath, mappings)
+                abstractMinecraft(classpath + classesOutputDir.toPath(), mappings)
                 copyImplToClassesDir()
                 copyApiForTestingInDev()
             }
@@ -223,16 +212,32 @@ class ProjectContext(private val project: Project) {
     }
 
     private fun createAbstractionMetadata(classpath: List<Path>): AbstractionMetadata {
-        return getResources("interfaces.conf", "baseclasses.conf") { interfaces, baseclasses ->
+        return getResources("interfaces.conf", "baseclasses.conf", "iinterfaces.properties", "baseinterfaces.properties") { interfaces, baseclasses, iinterfacesPath, baseinterfacesPath ->
             val interfaceSelection = AbstractionSelection.fromHocon(interfaces.readToString())
             val baseclassSelection = AbstractionSelection.fromHocon(baseclasses.readToString())
-            AbstractionMetadata(
+            val imap = HashMap<String, Collection<String>>()
+            val iinterfaceProperties = Properties()
+            iinterfaceProperties.load(iinterfacesPath.inputStream())
+            iinterfaceProperties.forEach {a, b ->
+                imap[a.toString()] = b.toString().split(",")
+            }
+
+            val baseMap = HashMap<String, Collection<String>>()
+            val interfaceBaseProperties = Properties()
+            interfaceBaseProperties.load(baseinterfacesPath.inputStream())
+            interfaceBaseProperties.forEach {a, b ->
+                baseMap[a.toString()] = b.toString().split(",")
+            }
+
+             AbstractionMetadata(
                     versionPackage = VersionPackage.fromMcVersion(mcVersion),
                     writeRawAsm = true,
                     fitToPublicApi = false,
                     classPath = classpath,
                     javadocs = JavaDocs.readTiny(mappingsPath),
-                    selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector()
+                    selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector(),
+                    iinterfaces = imap,
+                    interfacesbase = baseMap
             )
         }
 
@@ -300,4 +305,14 @@ class ProjectContext(private val project: Project) {
         }
     }
 
+}
+
+fun <T> getResources(path1: String, path2: String, path3: String, path4: String, usage: (Path, Path, Path, Path) -> T) :T {
+    return getResource(path1) { r1 ->
+        getResource(path2) { r2 ->
+            getResource(path3) { r3 ->
+                getResource(path4) {r4 -> usage(r1, r2, r3, r4)}
+            }
+        }
+    }
 }

@@ -75,13 +75,13 @@ class ProjectContext(private val project: Project) {
 
     private val runtimeManifestProperties = resourcesOutputDir.resolve("runtimeManifest.properties").toPath()
     private val implNamedDest = classesOutputDir.toPath()
-    private val currentVersionAbstractedDirInClasses = implNamedDest.resolve("v" + mcVersion.replace(".","_"))
+    private val currentVersionAbstractedDirInClasses = implNamedDest.resolve("v" + mcVersion.replace(".", "_"))
 
     private val apiForDevTesting = project.file("dev/test-api.jar").toPath()
-    val apiBinariesJar = abstractedDir.resolve("api.jar")
-    val apiSourcesJar = abstractedDir.resolve("api-sources.jar")
+    private val apiBinariesJar = abstractedDir.resolve("api.jar")
+    private val apiSourcesJar = abstractedDir.resolve("api-sources.jar")
 
-    val abstractionManifestJar = abstractedDir.resolve("abstractionManifest.jar")
+    private val abstractionManifestJar = abstractedDir.resolve("abstractionManifest.jar")
 
 
     private fun downloadIfChanged(url: String, path: Path) {
@@ -117,9 +117,11 @@ class ProjectContext(private val project: Project) {
                 copyApiForTestingInDev()
             }
         }
-
-        project.tasks.getByName("processResources").dependsOn(abstractTask)
-        project.tasks.getByName("classes").dependsOn(abstractTask)
+        // We need the classfiles of FebbAssembly to verify the abstracted impl jar, since we use interfaces
+        // from there.
+        abstractTask.dependsOn(project.tasks.getByName("classes"))
+        // Make sure Abstract runs before we publish
+        project.tasks.getByName("assemble").dependsOn(abstractTask)
     }
 
     private fun copyApiForTestingInDev() {
@@ -127,11 +129,12 @@ class ProjectContext(private val project: Project) {
         apiBinariesJar.copyTo(apiForDevTesting)
     }
 
+    // This is so the published artifact will have the abstracted stuff, in addition to the real java code
+    // we have in FebbAssembly
     private fun copyImplToClassesDir() {
-        classesOutputDir.deleteRecursively()
-//        currentVersionAbstractedDirInClasses.deleteRecursively()
         FileUtils.copyDirectory(implNamedDir.toFile(), implNamedDest.toFile())
     }
+
 
     private fun downloadMinecraft(versionManifest: JsonObject) {
         val downloads = versionManifest.getObject("downloads")
@@ -223,7 +226,7 @@ class ProjectContext(private val project: Project) {
         return getResources("interfaces.conf", "baseclasses.conf") { interfaces, baseclasses ->
             val interfaceSelection = AbstractionSelection.fromHocon(interfaces.readToString())
             val baseclassSelection = AbstractionSelection.fromHocon(baseclasses.readToString())
-             AbstractionMetadata(
+            AbstractionMetadata(
                     versionPackage = VersionPackage.fromMcVersion(mcVersion),
                     writeRawAsm = true,
                     fitToPublicApi = false,
@@ -248,12 +251,24 @@ class ProjectContext(private val project: Project) {
             it.abstract(apiSourcesDir, apiMetadata.copy(writeRawAsm = false))
         }
 
-        verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath))
+        deleteOldAbstractedClassesInClassesDir()
+        verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath, classesOutputDir.toPath()))
 //        implNamedDir.convertDirToJar(implNamedJar)
         apiBinariesDir.convertDirToJar(apiBinariesJar)
         apiSourcesDir.convertDirToJar(apiSourcesJar)
         return manifest
     }
+
+    private fun deleteOldAbstractedClassesInClassesDir() {
+        classesOutputDir.toPath().directChildren().forEach {
+            // we assume only api classes start with "v". If we accidently name something with a root package
+            // of "vaccum" it will be a very sad day.
+            if (it.toString().startsWith("v")) {
+                it.deleteRecursively()
+            }
+        }
+    }
+
 
     private fun saveManifest(manifest: AbstractionManifest, mappings: TinyTree) {
         abstractionManifestJson.writeString(

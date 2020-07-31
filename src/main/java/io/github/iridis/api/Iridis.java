@@ -1,4 +1,4 @@
-package io.github.iridis;
+package io.github.iridis.api;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;

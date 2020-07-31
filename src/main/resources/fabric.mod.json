@@ -12,10 +12,8 @@
     "homepage": "https://github.com/IridisMC/FebbAssembly",
     "sources": "https://github.com/IridisMC/FebbAssembly"
   },
-
   "license": "MIT",
   "icon": "assets/iridis-impl-fabric/icon.png",
-
   "environment": "*",
   "entrypoints": {
     "mm:early_risers": [
@@ -24,5 +22,8 @@
   },
   "depends": {
     "fabricloader": ">=0.7.4"
+  },
+  "custom": {
+    "nano:evt": "events.ini"
   }
 }

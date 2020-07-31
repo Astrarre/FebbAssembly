@@ -11,7 +11,11 @@ plugins {
 
 
 repositories {
+    maven {
+        url = 'https://raw.githubusercontent.com/Devan-Kerman/Devan-Repo/master/'
+    }
     maven { url = "https://dl.bintray.com/febb/maven" }
+    maven { url 'https://jitpack.io' }
 }
 
 
@@ -30,12 +34,14 @@ archivesBaseName = "api"
 
 
 dependencies {
+    // fabric
     minecraft("com.mojang:minecraft:$minecraft_version")
     mappings("net.fabricmc:yarn:$minecraft_version+build.$mappings_build:v2")
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
-    modImplementation("io.github.febb:fabric-asm:2.0.1")
-    include("io.github.febb:fabric-asm:2.0.1")
+    // api
     compileOnly(files("dev/test-api.jar"))
+    // nanoevents (includes fasm)
+    modImplementation 'net.devtech:NanoEvents:2.0'
 }
 
 processResources {

@@ -1,7 +1,7 @@
 package io.github.iridis.internal;
 
 import com.chocohead.mm.api.ClassTinkerers;
-import io.github.iridis.Iridis;
+import io.github.iridis.api.Iridis;
 
 import java.io.IOException;
 import java.io.InputStream;

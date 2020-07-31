@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "io.github.iridis.internal.asm.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "chunkaccess.WorldChunkMixin",
+    "events.ServerPlayerInteractionManagerMixin_PostBlockBreakEvent",
+    "events.ServerPlayerInteractionManagerMixin_PreBlockBreakEvent"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

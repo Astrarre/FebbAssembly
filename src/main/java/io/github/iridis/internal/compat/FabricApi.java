@@ -17,11 +17,11 @@ public class FabricApi {
 			if(LOADER.isModLoaded("fabric-events-lifecycle-v1")) {
 				ServerTickEvents.END_SERVER_TICK.register(m -> LifecycleEvents.serverTick((IMinecraftServer)m));
 				ServerLifecycleEvents.SERVER_STARTED.register(m -> LifecycleEvents.serverTick((IMinecraftServer) m));
-				ServerLifecycleEvents.SERVER_STOPPING.register(m -> LifecycleEvents.serverEnd((IMinecraftServer) m));
+				ServerLifecycleEvents.SERVER_STOPPING.register(m -> LifecycleEvents.serverStop((IMinecraftServer) m));
 			} else if(LOADER.isModLoaded("fabric-events-lifecycle-v0")) {
 				ServerTickCallback.EVENT.register(m -> LifecycleEvents.serverTick((IMinecraftServer) m));
 				ServerStartCallback.EVENT.register(m -> LifecycleEvents.serverStart((IMinecraftServer)m));
-				ServerStopCallback.EVENT.register(m -> LifecycleEvents.serverEnd((IMinecraftServer) m));
+				ServerStopCallback.EVENT.register(m -> LifecycleEvents.serverStop((IMinecraftServer) m));
 			}
 		}
 	}

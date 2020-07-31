@@ -13,7 +13,7 @@ import net.minecraft.server.MinecraftServer;
 public class MinecraftServerMixin_ServerStopEvent {
 	@Inject (at = @At ("TAIL"), method = "shutdown")
 	private void afterShutdownServer(CallbackInfo info) {
-		LifecycleEvents.serverEnd((IMinecraftServer) this);
+		LifecycleEvents.serverStop((IMinecraftServer) this);
 	}
 
 }

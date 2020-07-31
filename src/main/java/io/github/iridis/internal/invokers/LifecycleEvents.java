@@ -19,10 +19,10 @@ public class LifecycleEvents {
 		Logic.end();
 	}
 
-	@Invoker("iridis:server_end")
-	public static void serverEnd(IMinecraftServer server) {
+	@Invoker("iridis:server_stop")
+	public static void serverStop(IMinecraftServer server) {
 		Logic.start();
-		serverEnd(server);
+		serverStop(server);
 		Logic.end();
 	}
 }

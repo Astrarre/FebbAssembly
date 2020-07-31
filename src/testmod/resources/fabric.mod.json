@@ -1,10 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "iridis-impl-fabric",
+  "id": "iridis-impl-fabric-test",
   "version": "${version}",
-
-  "name": "Iridis for Fabric",
-  "description": "Allows running Iridis mods that will be automatically compatible with Minecraft in future versions.",
+  "name": "Iridis Test Mod for Fabric",
+  "description": "Testing Iridis functions",
   "authors": [
     "IridisMC!"
   ],
@@ -16,17 +15,14 @@
   "icon": "assets/iridis-impl-fabric/icon.png",
   "environment": "*",
   "entrypoints": {
-    "mm:early_risers": [
-      "io.github.iridis.internal.IridisAsm"
-    ],
     "main": [
-      "io.github.iridis.api.Iridis"
+      "io.github.iridis.test.IridisTest"
     ]
   },
   "depends": {
     "fabricloader": ">=0.7.4"
   },
   "custom": {
-    "nano:evt": "events.ini"
+    "nano:lst": "lst.ini"
   }
 }

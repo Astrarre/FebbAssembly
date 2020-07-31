@@ -1,9 +1,5 @@
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
-
 plugins {
-    id("fabric-loom") version ("0.4-SNAPSHOT")
+    id("fabric-loom") version("0.4-SNAPSHOT")
     id("maven-publish")
     id("com.dorongold.task-tree") version "1.5"
     id "com.jfrog.bintray" version "1.8.5"
@@ -31,7 +27,12 @@ group 'io.github.febb'
 version totalVersion
 archivesBaseName = "api"
 
-
+sourceSets {
+    testmod {
+        compileClasspath += main.compileClasspath
+        runtimeClasspath += main.runtimeClasspath
+    }
+}
 
 dependencies {
     // fabric
@@ -43,6 +44,11 @@ dependencies {
     compileOnly(files("dev/test-api.jar"))
     // nanoevents (includes fasm)
     modImplementation 'net.devtech:NanoEvents:2.2'
+
+    afterEvaluate {
+        testmodCompile project
+        //testmodCompile project("${it.name}:").sourceSets.testmod.output
+    }
 }
 
 processResources {
@@ -70,26 +76,25 @@ publishing {
 
             def artifacts = FebbAssembly.Companion.artifacts
 
-            artifact(remapJar){
+            artifact(remapJar) {
                 builtBy remapJar
                 classifier "impl-fabric"
             }
 
-            artifact(artifacts.apiBinariesJar){
+            artifact(artifacts.apiBinariesJar) {
                 classifier "api"
             }
 
-            artifact(artifacts.apiSourcesJar){
+            artifact(artifacts.apiSourcesJar) {
                 classifier "api-sources"
             }
 
-            artifact(artifacts.abstractionManifestJar){
+            artifact(artifacts.abstractionManifestJar) {
                 classifier "dev-manifest"
             }
         }
     }
 }
-
 
 
 bintray {

@@ -1,4 +1,4 @@
-package io.github.iridis.internal.asm.mixin.events;
+package io.github.iridis.internal.asm.mixin.events.block;
 
 import io.github.iridis.internal.invokers.BlockEvents;
 import org.spongepowered.asm.mixin.Mixin;

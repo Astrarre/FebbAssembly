@@ -17,7 +17,10 @@
   "environment": "*",
   "entrypoints": {
     "mm:early_risers": [
-      "io.github.ladder.FabricAsm"
+      "io.github.iridis.FabricAsm"
+    ],
+    "main": [
+      "io.github.iridis.api.Iridis"
     ]
   },
   "depends": {

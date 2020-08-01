@@ -6,8 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.chocohead.mm.api.ClassTinkerers;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import com.google.common.collect.ImmutableMap;
 import io.github.iridis.api.Iridis;
 
 import net.fabricmc.loader.api.FabricLoader;
@@ -27,29 +26,31 @@ public class IridisAsm implements Runnable {
 		return manifest;
 	}
 
-	private static final BiMap<String, String> MC_TO_API;
+	private static final Map<String, String> API_TO_MC;
 	static {
 		if(Iridis.IN_DEV) {
-			MC_TO_API = HashBiMap.create();
+			ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
 			getRuntimeManifest().forEach((k, v) -> {
 				String mapped = FabricLoader.getInstance().getMappingResolver().mapClassName("intermediary", k.toString());
-				MC_TO_API.put((mapped == null ? k.toString() : mapped).replace('.', '/'), v.toString());
+				map.put(v.toString(), (mapped == null ? k.toString() : mapped).replace('.', '/'));
 			});
+			API_TO_MC = map.build();
 		} else {
-			//noinspection unchecked,rawtypes
-			MC_TO_API = HashBiMap.create((Map)getRuntimeManifest());
+			ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
+			getRuntimeManifest().forEach((k, v) -> map.put(v.toString(), map.toString()));
+			API_TO_MC = map.build();
 		}
 	}
 
 	@Override
 	public void run() {
 		System.out.println("Attaching Iridis API to Minecraft...");
-		MC_TO_API.forEach((mcName, apiName) -> ClassTinkerers.addTransformation(mcName, clazz -> clazz.interfaces.add(apiName)));
+		API_TO_MC.forEach((mcName, apiName) -> ClassTinkerers.addTransformation(mcName, clazz -> clazz.interfaces.add(apiName)));
 		System.out.println("Iridis transformation complete!");
 	}
 
 	public static String getMinecraftFromApi(String apiClassName) {
-		return MC_TO_API.inverse()
+		return API_TO_MC
 		                .get(apiClassName);
 	}
 }

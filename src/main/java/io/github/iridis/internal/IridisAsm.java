@@ -45,7 +45,7 @@ public class IridisAsm implements Runnable {
 	@Override
 	public void run() {
 		System.out.println("Attaching Iridis API to Minecraft...");
-		API_TO_MC.forEach((mcName, apiName) -> ClassTinkerers.addTransformation(mcName, clazz -> clazz.interfaces.add(apiName)));
+		API_TO_MC.forEach((apiName, mcName) -> ClassTinkerers.addTransformation(mcName, clazz -> clazz.interfaces.add(apiName)));
 		System.out.println("Iridis transformation complete!");
 	}
 

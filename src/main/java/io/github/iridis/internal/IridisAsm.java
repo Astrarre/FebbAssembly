@@ -33,10 +33,7 @@ public class IridisAsm implements Runnable {
 			MC_TO_API = HashBiMap.create();
 			getRuntimeManifest().forEach((k, v) -> {
 				String mapped = FabricLoader.getInstance().getMappingResolver().mapClassName("intermediary", k.toString());
-				if(mapped == null) {
-					mapped = k.toString();
-				}
-				MC_TO_API.put(mapped.replace('.', '/'), v.toString());
+				MC_TO_API.put((mapped == null ? k.toString() : mapped).replace('.', '/'), v.toString());
 			});
 		} else {
 			//noinspection unchecked,rawtypes

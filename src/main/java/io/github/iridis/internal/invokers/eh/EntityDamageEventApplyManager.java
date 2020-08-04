@@ -34,14 +34,14 @@ public class EntityDamageEventApplyManager implements EventApplyManager, Opcodes
 			label:
 			for (String s : listener.split(",")) {
 				if(node != null) {
-					write(node, s);
+					write(node, s, entityClass);
 					continue;
 				}
 
 				for (MethodNode method : c.methods) {
 					if (Constants.DAMAGE_METHOD_NAME.equals(method.name) && Constants.DAMAGE_METHOD_DESC.equals(method.desc)) {
 						// detected
-						write(method, s);
+						write(method, s, entityClass);
 						node = method;
 						continue label;
 					}
@@ -49,7 +49,7 @@ public class EntityDamageEventApplyManager implements EventApplyManager, Opcodes
 
 				MethodNode method = new MethodNode(ACC_PUBLIC, Constants.DAMAGE_METHOD_NAME, Constants.DAMAGE_METHOD_DESC, null, null);
 				node = method;
-				write(method, s);
+				write(method, s, entityClass);
 				// write super call
 				method.visitVarInsn(ALOAD, 0);
 				method.visitVarInsn(ALOAD, 1);
@@ -63,15 +63,13 @@ public class EntityDamageEventApplyManager implements EventApplyManager, Opcodes
 
 	}
 
-	private static boolean test() {return true;}
-
-	private static void write(MethodNode node, String s) {
+	private static void write(MethodNode node, String listener, String entityClass) {
 		InsnList insns = new InsnList();
 		insns.insert(new VarInsnNode(ALOAD, 0));
 		insns.insert(new VarInsnNode(ALOAD, 1));
 		insns.insert(new VarInsnNode(FLOAD, 2));
-		int index = s.indexOf("::");
-		insns.insert(new MethodInsnNode(INVOKESTATIC, s.substring(0, index), s.substring(index + 2), Constants.ENTITY_DAMAGE_LISTENER_DESC)); // todo replace with signature accepting "s"
+		int index = listener.indexOf("::");
+		insns.insert(new MethodInsnNode(INVOKESTATIC, listener.substring(0, index), listener.substring(index + 2), String.format(Constants.ENTITY_DAMAGE_LISTENER_DESC, entityClass))); // todo replace with signature accepting "s"
 		LabelNode ret = new LabelNode();
 		insns.insert(new JumpInsnNode(IFEQ, ret));
 		insns.insert(new InsnNode(ICONST_0));

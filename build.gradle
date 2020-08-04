@@ -43,7 +43,9 @@ dependencies {
     // api
     compileOnly(files("dev/test-api.jar"))
     // nanoevents (includes fasm)
-    modImplementation 'net.devtech:NanoEvents:2.2'
+    modImplementation 'net.devtech:NanoEvents:3.0.0'
+    compileOnly 'net.devtech:nanoevents-ap:1.0.0'
+    annotationProcessor 'net.devtech:nanoevents-ap:1.0.0'
 
     afterEvaluate {
         testmodCompile project

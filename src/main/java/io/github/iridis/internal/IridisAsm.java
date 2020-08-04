@@ -9,16 +9,14 @@ import com.chocohead.mm.api.ClassTinkerers;
 import com.google.common.collect.ImmutableMap;
 import io.github.iridis.api.Iridis;
 
-import net.fabricmc.loader.api.FabricLoader;
-
 public class IridisAsm implements Runnable {
 	private static Properties getRuntimeManifest() {
 		Properties manifest = new Properties();
 		try (InputStream stream = IridisAsm.class.getClassLoader()
 		                                         .getResourceAsStream("runtimeManifest.properties")) {
-            if (stream == null) {
-                throw new IllegalStateException("Fuck resources");
-            }
+			if (stream == null) {
+				throw new IllegalStateException("Fuck resources");
+			}
 			manifest.load(stream);
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not load runtime manifest for attaching febb api interfaces!", e);
@@ -27,19 +25,18 @@ public class IridisAsm implements Runnable {
 	}
 
 	private static final Map<String, String> API_TO_MC;
+
 	static {
-		if(Iridis.IN_DEV) {
-			ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
-			getRuntimeManifest().forEach((k, v) -> {
-				String mapped = FabricLoader.getInstance().getMappingResolver().mapClassName("intermediary", k.toString());
-				map.put(v.toString(), (mapped == null ? k.toString() : mapped).replace('.', '/'));
-			});
-			API_TO_MC = map.build();
-		} else {
-			ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
-			getRuntimeManifest().forEach((k, v) -> map.put(v.toString(), map.toString()));
-			API_TO_MC = map.build();
-		}
+		ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
+		getRuntimeManifest().forEach((k, v) -> {
+			if (Iridis.IN_DEV) {
+				String mapped = Constants.MAPPING_RESOLVER.mapClassName("intermediary", k.toString());
+				map.put(v.toString(), (mapped == null ? k.toString() : mapped.replace('.', '/')));
+			} else {
+				map.put(v.toString(), k.toString());
+			}
+		});
+		API_TO_MC = map.build();
 	}
 
 	@Override
@@ -50,7 +47,6 @@ public class IridisAsm implements Runnable {
 	}
 
 	public static String getMinecraftFromApi(String apiClassName) {
-		return API_TO_MC
-		                .get(apiClassName);
+		return API_TO_MC.getOrDefault(apiClassName, apiClassName);
 	}
 }

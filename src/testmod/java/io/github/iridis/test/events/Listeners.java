@@ -7,7 +7,6 @@ import v1_16_1.net.minecraft.block.entity.IBlockEntity;
 import v1_16_1.net.minecraft.entity.IEntity;
 import v1_16_1.net.minecraft.entity.damage.IDamageSource;
 import v1_16_1.net.minecraft.entity.player.IPlayerEntity;
-import v1_16_1.net.minecraft.item.IItems;
 import v1_16_1.net.minecraft.util.math.IBlockPos;
 import v1_16_1.net.minecraft.world.IWorld;
 

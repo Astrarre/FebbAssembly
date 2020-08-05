@@ -23,6 +23,6 @@
     "fabricloader": ">=0.7.4"
   },
   "custom": {
-    "nano:lst": "lst.ini"
+    "nano:uses_AP": true
   }
 }

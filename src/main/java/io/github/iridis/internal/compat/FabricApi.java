@@ -1,6 +1,6 @@
 package io.github.iridis.internal.compat;
 
-import io.github.iridis.internal.invokers.LifecycleEvents;
+import io.github.iridis.internal.events.LifecycleEvents;
 import v1_16_1.net.minecraft.server.IMinecraftServer;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;

@@ -1,6 +1,6 @@
 package io.github.iridis.internal.asm.mixin.events.lifecycle;
 
-import io.github.iridis.internal.invokers.LifecycleEvents;
+import io.github.iridis.internal.events.LifecycleEvents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

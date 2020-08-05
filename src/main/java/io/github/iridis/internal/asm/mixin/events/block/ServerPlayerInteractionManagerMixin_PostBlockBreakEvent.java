@@ -1,6 +1,6 @@
 package io.github.iridis.internal.asm.mixin.events.block;
 
-import io.github.iridis.internal.invokers.BlockEvents;
+import io.github.iridis.internal.events.BlockEvents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -27,10 +27,9 @@ public class ServerPlayerInteractionManagerMixin_PostBlockBreakEvent {
 	@Shadow public ServerWorld world;
 
 	@Inject (method = "tryBreakBlock",
-	         at = @At (value = "INVOKE",
-	                   target = "Lnet/minecraft/block/Block;afterBreak(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/item/ItemStack;)V"),
-	         locals = LocalCapture.CAPTURE_FAILHARD,
-	         cancellable = true)
+			at = @At (value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayerInteractionManager;isCreative()Z"),
+			locals = LocalCapture.CAPTURE_FAILHARD,
+			cancellable = true)
 	private void breakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir, BlockState state, BlockEntity entity) {
 		BlockEvents.playerPostBreak((IPlayerEntity) this.player, (IWorld) this.world, (IBlockPos)pos, (IBlockState)state, (IBlockEntity)entity);
 	}

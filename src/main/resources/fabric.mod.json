@@ -17,7 +17,7 @@
   "environment": "*",
   "entrypoints": {
     "mm:early_risers": [
-      "io.github.iridis.internal.IridisAsm"
+      "io.github.iridis.internal.asm.IridisAsm"
     ],
     "main": [
       "io.github.iridis.api.Iridis"
@@ -26,7 +26,12 @@
   "depends": {
     "fabricloader": ">=0.7.4"
   },
+  "mixins": [
+    "iridis.events.mixin.json",
+    "iridis.access.mixin.json"
+  ],
   "custom": {
+    "nano:uses_AP": true,
     "nano:evt": "events.ini"
   }
 }

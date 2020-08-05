@@ -1,4 +1,4 @@
-package io.github.iridis.internal.invokers.eh;
+package io.github.iridis.internal.events.eams;
 
 import net.devtech.nanoevents.api.event.EventApplyManager;
 import net.devtech.nanoevents.util.Id;
@@ -15,7 +15,12 @@ public class ModEventApplyManager extends EventApplyManager.Default {
 	public void init(Id id, Profile.Section section) {
 		String fapi = section.get("mods");
 		for (String s : fapi.split(",")) {
-			if(FabricLoader.getInstance().isModLoaded(s)) {
+			// AP spits out quoted strings, can't figure out why but idc
+			if (s.startsWith("\"") && s.endsWith("\"")) {
+				s = s.substring(1, s.length() - 1);
+			}
+			if (FabricLoader.getInstance()
+			                .isModLoaded(s)) {
 				section.put("mixinPath", null);
 				break;
 			}

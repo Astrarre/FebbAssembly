@@ -1,0 +1,26 @@
+{
+  "required": true,
+  "package": "io.github.iridis.internal.asm.mixin.events",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "net.devtech.nanoevents.plugin.NanoEventMixinPlugin",
+  "mixins": [
+    "block.BlockItemMixin_PostBlockPlaceEvent",
+    "block.BlockItemMixin_PreBlockPlaceEvent",
+    "block.FireBlockMixin_PostBlockBurnedEvent",
+    "block.FireBlockMixin_PreBlockBurnedEvent",
+    "block.ServerPlayerInteractionManagerMixin_PostBlockBreakEvent",
+    "block.ServerPlayerInteractionManagerMixin_PreBlockBreakEvent",
+    "block.WorldMixin_PostSetBlockEvent",
+    "block.WorldMixin_PreSetBlockEvent",
+    "entity.LivingEntityMixin_PreLivingEntityLandEvent",
+    "lifecycle.MinecraftServerMixin_ServerStartEvent",
+    "lifecycle.MinecraftServerMixin_ServerStopEvent",
+    "lifecycle.MinecraftServerMixin_ServerTickEvent",
+    "player.PlayerManagerMixin_PostPlayerJoinEvent",
+    "player.PlayerManagerMixin_PrePlayerJoinEvent",
+    "player.ServerPlayerEntityMixin_PlayerSpawnEvent"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

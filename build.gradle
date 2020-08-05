@@ -1,5 +1,5 @@
 plugins {
-    id("fabric-loom") version("0.4-SNAPSHOT")
+    id("fabric-loom") version("0.5-SNAPSHOT")
     id("maven-publish")
     id("com.dorongold.task-tree") version "1.5"
     id "com.jfrog.bintray" version "1.8.5"
@@ -43,9 +43,16 @@ dependencies {
     // api
     compileOnly(files("dev/test-api.jar"))
     // nanoevents (includes fasm)
-    modImplementation 'net.devtech:NanoEvents:3.0.0'
-    compileOnly 'net.devtech:nanoevents-ap:1.0.0'
-    annotationProcessor 'net.devtech:nanoevents-ap:1.0.0'
+    modImplementation "net.devtech:NanoEvents:$nano_events_ver"
+
+    testmodCompileOnly 'net.devtech:nanoevents-ap:1.0.4'
+    compileOnly 'net.devtech:nanoevents-ap:1.0.4'
+
+    annotationProcessor 'net.devtech:nanoevents-ap:1.0.4'
+    testmodAnnotationProcessor 'net.devtech:nanoevents-ap:1.0.4'
+
+    // https://mvnrepository.com/artifact/org.jetbrains/annotations
+    compileOnly 'org.jetbrains:annotations:19.0.0'
 
     afterEvaluate {
         testmodCompile project
@@ -53,8 +60,28 @@ dependencies {
     }
 }
 
+processTestmodResources {
+    inputs.property "version", project.version
+    from(sourceSets.testmod.output.classesDirs.singleFile) {
+        include "nanoevents/**"
+    }
+
+    from(sourceSets.testmod.resources.srcDirs) {
+        include "fabric.mod.json"
+        expand "version": project.version
+    }
+
+    from(sourceSets.testmod.resources.srcDirs) {
+        exclude "fabric.mod.json"
+    }
+}
+
 processResources {
     inputs.property "version", project.version
+
+    from(sourceSets.main.output.classesDirs.singleFile) {
+        include "nanoevents/**"
+    }
 
     from(sourceSets.main.resources.srcDirs) {
         include "fabric.mod.json"
@@ -108,11 +135,10 @@ bintray {
         repo = "maven"
         name = "Febb-Api"
         userOrg = "febb"
-        licenses = ["mit"]
+        licenses = ["LGPLv3"]
         version {
             name = totalVersion
             released = new Date()
         }
     }
-
 }

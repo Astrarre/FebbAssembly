@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "io.github.iridis.internal.asm.mixin.access",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "BrewingRecipeRegistryAccess"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

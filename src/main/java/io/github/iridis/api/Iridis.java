@@ -14,6 +14,6 @@ public class Iridis implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		FabricApi.init();
-		// todo iridis mods
+		// todo iridis mods entrypoint, load order?
 	}
 }

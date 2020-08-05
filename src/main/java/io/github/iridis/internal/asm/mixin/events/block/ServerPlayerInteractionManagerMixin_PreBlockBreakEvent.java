@@ -1,6 +1,6 @@
 package io.github.iridis.internal.asm.mixin.events.block;
 
-import io.github.iridis.internal.invokers.BlockEvents;
+import io.github.iridis.internal.events.BlockEvents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,7 +34,7 @@ public class ServerPlayerInteractionManagerMixin_PreBlockBreakEvent {
 	         locals = LocalCapture.CAPTURE_FAILHARD,
 	         cancellable = true)
 	private void breakBlock(BlockPos pos, CallbackInfoReturnable<Boolean> cir, BlockState state, BlockEntity entity, Block block) {
-		if (!BlockEvents.playerPreBreak((IPlayerEntity) this.player, (IWorld) this.world, (IBlockPos)pos, (IBlockState)state, (IBlockEntity)entity)) {
+		if (BlockEvents.playerPreBreak((IPlayerEntity) this.player, (IWorld) this.world, (IBlockPos) pos, (IBlockState) state, (IBlockEntity) entity)) {
 			BlockPos cornerPos = pos.add(-1, -1, -1);
 			for (int x = 0; x < 3; x++) {
 				for (int y = 0; y < 3; y++) {

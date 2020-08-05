@@ -1,4 +1,4 @@
-package io.github.iridis.internal;
+package io.github.iridis.internal.asm;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +8,7 @@ import java.util.Properties;
 import com.chocohead.mm.api.ClassTinkerers;
 import com.google.common.collect.ImmutableMap;
 import io.github.iridis.api.Iridis;
+import io.github.iridis.internal.Constants;
 
 public class IridisAsm implements Runnable {
 	private static Properties getRuntimeManifest() {

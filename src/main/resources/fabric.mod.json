@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "iridis-impl-fabric",
   "version": "${version}",
-
   "name": "Iridis for Fabric",
   "description": "Allows running Iridis mods that will be automatically compatible with Minecraft in future versions.",
   "authors": [
@@ -28,7 +27,8 @@
   },
   "mixins": [
     "iridis.events.mixin.json",
-    "iridis.access.mixin.json"
+    "iridis.access.mixin.json",
+    "iridis.api.mixin.json"
   ],
   "custom": {
     "nano:uses_AP": true,

@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "io.github.iridis.internal.asm.mixin.api",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "data.CompoundTagMixin_NBTag"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

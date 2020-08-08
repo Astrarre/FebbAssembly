@@ -7,6 +7,7 @@ import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.collection.Int2ObjectBiMap;
 
 import net.fabricmc.fabric.api.util.NbtType;
@@ -15,6 +16,13 @@ import net.fabricmc.fabric.api.util.NbtType;
  * @implNote create a wrapper class for CompoundTag when a key name changes
  */
 public interface NBTag {
+	/**
+	 * create a new empty NBTag
+	 */
+	static NBTag create() {
+		return (NBTag) new CompoundTag();
+	}
+
 	/**
 	 * create a new nbt tag for a minecraft version, this is used for nested values
 	 *

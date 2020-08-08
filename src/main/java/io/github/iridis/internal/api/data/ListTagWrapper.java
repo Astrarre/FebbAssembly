@@ -18,7 +18,8 @@ public class ListTagWrapper<T> extends AbstractList<T> {
 
 	@Override
 	public T set(int index, T element) {
-		return this.tags.set(index, );
+		// todo fix
+		return (T) this.tags.set(index, null);
 	}
 
 	@Override

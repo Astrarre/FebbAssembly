@@ -3,6 +3,17 @@
   "package": "io.github.iridis.internal.asm.mixin.api",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "context.TntEntityMixin_Test",
+    "context.blockentity.BlockEntityMixin",
+    "context.blockentity.WorldMixin",
+    "context.entity.EntityMixin",
+    "context.entity.ServerWorldMixin",
+    "context.interact.ServerPlayerInteractionManagerMixin",
+    "context.scheduledtick.ScheduledTickMixin",
+    "context.scheduledtick.ServerTickSchedulerMixin",
+    "context.scheduledtick.ServerWorldMixin",
+    "context.syncedBlockEvents.BlockEventMixin",
+    "context.syncedBlockEvents.ServerWorldMixin",
     "data.CompoundTagMixin_NBTag"
   ],
   "injectors": {

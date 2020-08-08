@@ -15,9 +15,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.options.Option
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
@@ -39,7 +37,7 @@ class FebbAssembly : Plugin<Project> {
 }
 
 
-class ProjectContext (private val project: Project) {
+class ProjectContext(private val project: Project) {
     private val sourceSets = project.convention.getPlugin(JavaPluginConvention::class.java).sourceSets
     private val resourcesOutputDir = sourceSets.getByName("main").output.resourcesDir!!
     private val classesOutputDir = sourceSets.getByName("main").output.classesDirs.first()
@@ -83,7 +81,7 @@ class ProjectContext (private val project: Project) {
     }
 
     open class AbstractTask @Inject constructor(private val context: ProjectContext) : DefaultTask() {
-        private var noVerify: Boolean = false
+//        private var noVerify: Boolean = false
 
         init {
             group = "FebbAssembly"
@@ -94,18 +92,20 @@ class ProjectContext (private val project: Project) {
                 outputs.dir(currentVersionAbstractedDirInClasses.toFile())
                 outputs.file(runtimeManifestProperties.toFile())
                 outputs.file(apiForDevTesting.toFile())
+
+
             }
         }
 
-        @Option(option = "noverify", description = "Don't verify the abstracted jar is valid")
-        fun setNoVerify(noVerify: Boolean) {
-            this.noVerify = noVerify
-        }
-
-        @Input
-        fun getNoVerify(): Boolean {
-            return noVerify
-        }
+//        @Option(option = "noverify", description = "Don't verify the abstracted jar is valid")
+//        fun setNoVerify(noVerify: Boolean) {
+//            this.noVerify = noVerify
+//        }
+//
+//        @Input
+//        fun getNoVerify(): Boolean {
+//            return noVerify
+//        }
 
         @TaskAction
         fun abstract() = with(context) {
@@ -116,22 +116,36 @@ class ProjectContext (private val project: Project) {
             downloadMcLibraries(versionManifest)
             mergeMinecraftJars()
             downloadMappings()
-            val classpath = libsDir.recursiveChildren().filter { it.hasExtension(".jar") }.toList()
+            val classpath = buildClasspath()
             val mappings = Files.newBufferedReader(mappingsPath).use { TinyMappingFactory.load(it) }
             remapMinecraftJar(classpath, mappings)
 
-            abstractMinecraft(classpath + classesOutputDir.toPath(), mappings, verify = !noVerify)
+            abstractMinecraft(classpath + classesOutputDir.toPath(), mappings)
             copyImplToClassesDir()
             copyApiForTestingInDev()
         }
+
+    }
+
+    private fun buildClasspath() = libsDir.recursiveChildren().filter { it.hasExtension(".jar") }.toList()
+
+    private fun verifyAbstractedJar() {
+        val classpath = buildClasspath()
+        println("Verifying abstracted jar...")
+        verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath, classesOutputDir.toPath()))
     }
 
     fun apply() {
         val abstractTask = project.tasks.register<AbstractTask>("abstract", AbstractTask::class.java, this)
+        project.tasks.getByName("build").doLast {
+            verifyAbstractedJar()
+        }
+
         // We need the classfiles of FebbAssembly to verify the abstracted impl jar, since we use interfaces
         // from there.
         // Make sure Abstract runs before we publish
-        project.tasks.getByName("assemble").dependsOn(abstractTask)
+        project.tasks.getByName("prepareKotlinBuildScriptModel").dependsOn(abstractTask)
+        project.tasks.getByName("classes").dependsOn(abstractTask)
     }
 
     private fun copyApiForTestingInDev() {
@@ -213,12 +227,11 @@ class ProjectContext (private val project: Project) {
 
     private fun abstractMinecraft(
             classpath: List<Path>,
-            mappings: TinyTree,
-            verify: Boolean
+            mappings: TinyTree
     ) {
         assert(remappedMcPath.exists())
         val metadata = createAbstractionMetadata(classpath)
-        val manifest = runAbstractor(metadata, classpath, verify)
+        val manifest = runAbstractor(metadata, classpath)
         saveManifest(manifest, mappings)
     }
 
@@ -257,8 +270,7 @@ class ProjectContext (private val project: Project) {
 
     private fun runAbstractor(
             metadata: AbstractionMetadata,
-            classpath: List<Path>,
-            verify: Boolean
+            classpath: List<Path>
     ): AbstractionManifest {
         abstractedDirectOutputDir.createDirectories()
         val manifest = Abstractor.parse(mcJar = remappedMcPath, metadata = metadata) {
@@ -269,10 +281,6 @@ class ProjectContext (private val project: Project) {
         }
 
         deleteOldAbstractedClassesInClassesDir()
-        if (verify) {
-            println("Verifying abstracted jar...")
-            verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath, classesOutputDir.toPath()))
-        }
 //        implNamedDir.convertDirToJar(implNamedJar)
         apiBinariesDir.convertDirToJar(apiBinariesJar)
         apiSourcesDir.convertDirToJar(apiSourcesJar)

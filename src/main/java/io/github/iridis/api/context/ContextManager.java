@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 public class ContextManager {
 	public static final ThreadLocal<ContextManager> INSTANCE = ThreadLocal.withInitial(ContextManager::new);
 
-	private static final Object STACK_MARKER = new Object();
+	private enum StackMarker {INSTANCE}
 	// todo type sorting list for speed
 	private final ObjectArrayList<Object> context = new ObjectArrayList<>();
 
@@ -62,18 +62,26 @@ public class ContextManager {
 		}
 	}
 
+	public void pop(String key, Object object) {
+		Object popped = this.context.pop();
+		if(!(popped instanceof ContextKey) || !Objects.equals(((ContextKey) popped).object, object) || !Objects.equals(((ContextKey) popped).key, key)) {
+			this.printStack();
+			throw new IllegalStateException("Expected to pop (" + key + ',' + object + ") but popped " + popped);
+		}
+	}
+
 	/**
 	 * put a marker object on the stack, subsequent {@link #copyStack()} will stop before this
 	 */
 	public void pushStackMarker() {
-		this.push(STACK_MARKER);
+		this.push(StackMarker.INSTANCE);
 	}
 
 	/**
 	 * pop a marker object
 	 */
 	public void popStackMarker() {
-		this.pop(STACK_MARKER);
+		this.pop(StackMarker.INSTANCE);
 	}
 
 	/**
@@ -140,14 +148,14 @@ public class ContextManager {
 		for (int i = 0; i < this.context.size(); i++) {
 			Object value = this.context.peek(i);
 			stack.add(0, value);
-			if (value == STACK_MARKER) {
+			if (value == StackMarker.INSTANCE) {
 				break;
 			}
 		}
 		return stack;
 	}
 
-	public <T> T pushStack(ObjectArrayList<Object> stack, Supplier<T> func) {
+	public <T> T actStack(ObjectArrayList<Object> stack, Supplier<T> func) {
 		if (stack != null) {
 			for (Object o : stack) {
 				this.push(o);

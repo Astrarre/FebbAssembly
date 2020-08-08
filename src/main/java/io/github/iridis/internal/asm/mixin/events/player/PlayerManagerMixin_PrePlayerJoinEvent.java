@@ -3,7 +3,7 @@ package io.github.iridis.internal.asm.mixin.events.player;
 import java.net.SocketAddress;
 
 import com.mojang.authlib.GameProfile;
-import io.github.iridis.api.player.OfflinePlayer;
+import io.github.iridis.api.entity.player.OfflinePlayer;
 import io.github.iridis.internal.events.PlayerEvents;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

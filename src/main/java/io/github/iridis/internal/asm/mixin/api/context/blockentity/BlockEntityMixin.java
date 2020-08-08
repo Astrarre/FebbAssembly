@@ -1,8 +1,5 @@
 package io.github.iridis.internal.asm.mixin.api.context.blockentity;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.github.iridis.api.context.ContextManager;
 import io.github.iridis.api.context.ContextSerialization;
 import io.github.iridis.api.data.NBTag;
@@ -25,55 +22,26 @@ import net.fabricmc.fabric.api.util.NbtType;
 
 @Mixin (BlockEntity.class)
 public class BlockEntityMixin implements ContextHolderAccess {
-	private Map<String, ObjectArrayList<Object>> contextMap = new HashMap<>();
+	private ObjectArrayList<Object> placementContext = new ObjectArrayList<>();
 
 	@Override
-	public void setContext(String reason, ObjectArrayList<Object> context) {
-		this.contextMap.put(reason, context);
+	public void setContext(ObjectArrayList<Object> context) {
+		this.placementContext = context;
 	}
 
 	@Override
-	public ObjectArrayList<Object> getContext(String reason) {
-		return this.contextMap.get(reason);
+	public ObjectArrayList<Object> getContext() {
+		return this.placementContext;
 	}
 
 	@Inject (method = "toTag", at = @At ("HEAD"))
 	private void toTag(CompoundTag tag, CallbackInfoReturnable<CompoundTag> cir) {
-		CompoundTag context = new CompoundTag();
-		this.contextMap.forEach((k, v) -> {
-			ListTag tags = new ListTag();
-			for (Object o : v) {
-				if (o instanceof ContextSerialization.Writable) {
-					NBTag toWrite = ((ContextSerialization.Writable) o).to();
-					if (toWrite instanceof InternalTag) {
-						Id id = ((ContextSerialization.Writable) o).id();
-						toWrite.put(NBTag.Type.STRING, "ser_modid", id.mod);
-						toWrite.put(NBTag.Type.STRING, "ser_value", id.value);
-						tags.add(((InternalTag) toWrite).getInternal());
-					} else {
-						throw new IllegalArgumentException(o + "'s ContextSerialization.Writable#to returned a non-internaltag NBTag instance!");
-					}
-				}
-			}
-			context.put(k, tags);
-		});
-		tag.put("irids:context_", context);
+		tag.put("irids:context_", ContextSerialization.serialize(this.placementContext));
 	}
 
-	@Inject(method = "fromTag", at = @At("HEAD"))
+	@Inject (method = "fromTag", at = @At ("HEAD"))
 	private void fromTag(BlockState state, CompoundTag tag, CallbackInfo ci) {
-		CompoundTag context = tag.getCompound("context");
-		for (String key : context.getKeys()) {
-			ListTag tags = context.getList(key, NbtType.COMPOUND);
-			ObjectArrayList<Object> list = new ObjectArrayList<>();
-			for (int i = 0; i < tags.size(); i++) {
-				CompoundTag data = tags.getCompound(i);
-				Id id = new Id(data.getString("ser_modid"), data.getString("ser_value"));
-				ContextSerialization.Readable readable = ContextSerialization.get(id);
-				Object obj = readable.from(ContextManager.getInstance(), (NBTag) data);
-				list.set(i, obj);
-			}
-			this.contextMap.put(key, list);
-		}
+		ListTag tags = tag.getList("irids:context_", NbtType.COMPOUND);
+		this.placementContext = ContextSerialization.deserialize(tags);
 	}
 }

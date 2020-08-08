@@ -1,6 +1,6 @@
 package io.github.iridis.internal.events;
 
-import io.github.iridis.api.player.OfflinePlayer;
+import io.github.iridis.api.entity.player.OfflinePlayer;
 import io.github.iridis.internal.asm.mixin.events.player.PlayerManagerMixin_PostPlayerJoinEvent;
 import io.github.iridis.internal.asm.mixin.events.player.PlayerManagerMixin_PrePlayerJoinEvent;
 import io.github.iridis.internal.asm.mixin.events.player.ServerPlayerEntityMixin_PlayerSpawnEvent;

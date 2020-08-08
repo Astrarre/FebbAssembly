@@ -11,12 +11,12 @@ public class BlockEventMixin implements ContextHolderAccess {
 	private ObjectArrayList<Object> context;
 
 	@Override
-	public void setContext(String reason, ObjectArrayList<Object> context) {
+	public void setContext(ObjectArrayList<Object> context) {
 		this.context = context;
 	}
 
 	@Override
-	public ObjectArrayList<Object> getContext(String reason) {
+	public ObjectArrayList<Object> getContext() {
 		return this.context;
 	}
 }

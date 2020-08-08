@@ -11,13 +11,12 @@ public class ScheduledTickMixin implements ContextHolderAccess {
 	private ObjectArrayList<Object> context;
 
 	@Override
-	public void setContext(String reason, ObjectArrayList<Object> context) {
-		if(reason != null) throw new IllegalStateException("Scheduled ticks only store the stack from when they're created, so pass null for reason");
+	public void setContext(ObjectArrayList<Object> context) {
 		this.context = context;
 	}
 
 	@Override
-	public ObjectArrayList<Object> getContext(String reason) {
+	public ObjectArrayList<Object> getContext() {
 		return this.context;
 	}
 }

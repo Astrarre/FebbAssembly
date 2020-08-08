@@ -3,7 +3,8 @@
   "package": "io.github.iridis.internal.asm.mixin.access",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "BrewingRecipeRegistryAccess"
+    "BrewingRecipeRegistryAccess",
+    "PlayerManagerAccess"
   ],
   "injectors": {
     "defaultRequire": 1

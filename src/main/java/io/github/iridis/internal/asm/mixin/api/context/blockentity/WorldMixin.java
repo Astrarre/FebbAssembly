@@ -19,7 +19,7 @@ public class WorldMixin {
 	@Inject(method = "setBlockEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEntity(Lnet/minecraft/block/entity/BlockEntity;)Z"))
 	private void context(BlockPos pos, @Nullable BlockEntity blockEntity, CallbackInfo ci) {
 		if(blockEntity != null) {
-			((ContextHolderAccess) blockEntity).setContext("iridis:placed_", ContextManager.getInstance()
+			((ContextHolderAccess) blockEntity).setContext(ContextManager.getInstance()
 			                                                                               .copyStack());
 		}
 	}
@@ -27,7 +27,7 @@ public class WorldMixin {
 	@Redirect(method = "tickBlockEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Tickable;tick()V"))
 	private void stack(Tickable tickable) {
 		ContextManager.getInstance()
-		              .pushStack(((ContextHolderAccess)tickable).getContext("iridis:placed_"), () -> {
+		              .actStack(((ContextHolderAccess)tickable).getContext(), () -> {
 			tickable.tick();
 			return null;
 		});

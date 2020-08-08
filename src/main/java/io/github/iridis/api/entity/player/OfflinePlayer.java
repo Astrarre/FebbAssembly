@@ -1,39 +1,34 @@
-package io.github.iridis.api.player;
+package io.github.iridis.api.entity.player;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.mojang.authlib.GameProfile;
+import io.github.iridis.api.context.ContextManager;
 import io.github.iridis.api.context.ContextSerialization;
 import io.github.iridis.api.data.NBTag;
+import io.github.iridis.api.entity.Player;
 import io.github.iridis.api.util.TriId;
+import io.github.iridis.internal.api.data.NBTagUtil;
+import io.github.iridis.internal.asm.mixin.access.PlayerManagerAccess;
 import net.devtech.nanoevents.util.Id;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import v1_16_1.net.minecraft.server.IMinecraftServer;
+import v1_16_1.net.minecraft.server.IPlayerManager;
+import v1_16_1.net.minecraft.server.network.IServerPlayerEntity;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.UserCache;
 
-public class OfflinePlayer implements ContextSerialization.Writable {
+public class OfflinePlayer implements ContextSerialization.Writable, Player {
 	private static final Id OFFLINE_PLAYER_ID = new Id("iridis", "offline_player");
 
 	static {
 		ContextSerialization.register(OFFLINE_PLAYER_ID, (c, t) -> {
-			MinecraftServer server = c.peekFirstOfType(MinecraftServer.class);
 			UUID uuid = NBTagUtil.uuidFrom(t);
-			if (server == null) {
-				return new OfflinePlayer(new GameProfile(uuid, null));
-			}
-			ServerPlayerEntity entity = server.getPlayerManager()
-			                                  .getPlayer(uuid);
-			if (entity != null) {
-				return entity;
-			}
-			UserCache cache = server.getUserCache();
-			GameProfile profile = cache.getByUuid(uuid);
-			return new OfflinePlayer(profile);
+			return Player.get(uuid);
 		});
 	}
 
@@ -46,22 +41,40 @@ public class OfflinePlayer implements ContextSerialization.Writable {
 	 * @deprecated internal
 	 */
 	@Deprecated
-	public OfflinePlayer(Object profile) {
-		if (profile instanceof GameProfile && ((GameProfile) profile).getId() != null) {
-			this.profile = (GameProfile) profile;
+	public OfflinePlayer(GameProfile profile) {
+		if (profile.getId() != null) {
+			this.profile = profile;
 		} else {
-			throw new IllegalArgumentException("profile must be instance of " + GameProfile.class);
+			throw new IllegalArgumentException("profile must contain uuid!");
 		}
 	}
 
+	@Override
 	@NotNull
 	public UUID getId() {
 		return this.profile.getId();
 	}
 
+	@Override
 	@Nullable
 	public String getName() {
 		return this.profile.getName();
+	}
+
+	/**
+	 * modify the inventory and general data of the server player entity, and then save immediately if the player is offline
+	 */
+	public void modifyOffline(Consumer<IServerPlayerEntity> consumer) {
+		IMinecraftServer server = ContextManager.getInstance().peekFirstOfTypeOrThrow(IMinecraftServer.class);
+		IPlayerManager manager = server.getPlayerManager();
+		IServerPlayerEntity entity = manager.getPlayer(this.getId());
+		if(entity == null) {
+			IServerPlayerEntity tempPlayer = manager.createPlayer(this.profile);
+			consumer.accept(tempPlayer);
+			((PlayerManagerAccess) (Object) manager).callSavePlayerData((ServerPlayerEntity) tempPlayer);
+		} else {
+			consumer.accept(entity);
+		}
 	}
 
 	public List<TriId> getProperty(String name) {

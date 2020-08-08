@@ -1,4 +1,4 @@
-package io.github.iridis.api.player;
+package io.github.iridis.internal.api.data;
 
 import java.util.UUID;
 

@@ -17,12 +17,12 @@ import net.minecraft.world.World;
 public class ServerWorldMixin {
 	@ModifyArg(method = "addSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;add(Ljava/lang/Object;)Z"))
 	private Object add(Object object) {
-		((ContextHolderAccess)object).setContext(null, ContextManager.getInstance().copyStack());
+		((ContextHolderAccess)object).setContext(ContextManager.getInstance().copyStack());
 		return object;
 	}
 
 	@Redirect (method = "processBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onSyncedBlockEvent(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;II)Z"))
 	private boolean process(BlockState state, World world, BlockPos pos, int type, int data, BlockEvent event) {
-		return ContextManager.getInstance().pushStack(((ContextHolderAccess)event).getContext(null), () -> state.onSyncedBlockEvent(world, pos, type, data));
+		return ContextManager.getInstance().actStack(((ContextHolderAccess)event).getContext(), () -> state.onSyncedBlockEvent(world, pos, type, data));
 	}
 }

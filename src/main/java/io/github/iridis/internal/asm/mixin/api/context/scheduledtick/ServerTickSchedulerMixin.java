@@ -22,7 +22,7 @@ public abstract class ServerTickSchedulerMixin {
 
 	@Redirect (method = "schedule", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
 	private <T> void addContext(ServerTickScheduler<T> scheduler, ScheduledTick<T> scheduledTick) {
-		((ContextHolderAccess)scheduledTick).setContext(null,
+		((ContextHolderAccess)scheduledTick).setContext(
 		                                                ContextManager.getInstance()
 		                                                              .copyStack());
 		this.addScheduledTick(scheduledTick);

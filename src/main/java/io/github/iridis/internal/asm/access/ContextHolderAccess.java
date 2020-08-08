@@ -3,10 +3,10 @@ package io.github.iridis.internal.asm.access;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 /**
- * an accessor interface for mananging scheduled ticks
+ * an accessor interface for mananging scheduled ticks, entities and stuff like that
  */
 public interface ContextHolderAccess {
-	void setContext(String reason, ObjectArrayList<Object> context);
+	void setContext(ObjectArrayList<Object> context);
 
-	ObjectArrayList<Object> getContext(String reason);
+	ObjectArrayList<Object> getContext();
 }

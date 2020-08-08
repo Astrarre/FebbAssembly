@@ -11,13 +11,18 @@ import net.fabricmc.stitch.merge.JarMerger
 import net.fabricmc.tinyremapper.OutputConsumerPath
 import net.fabricmc.tinyremapper.TinyRemapper
 import org.apache.commons.io.FileUtils
+import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.options.Option
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
+import javax.inject.Inject
 import kotlin.collections.HashMap
 
 class FebbAssembly : Plugin<Project> {
@@ -34,7 +39,7 @@ class FebbAssembly : Plugin<Project> {
 }
 
 
-class ProjectContext(private val project: Project) {
+class ProjectContext (private val project: Project) {
     private val sourceSets = project.convention.getPlugin(JavaPluginConvention::class.java).sourceSets
     private val resourcesOutputDir = sourceSets.getByName("main").output.resourcesDir!!
     private val classesOutputDir = sourceSets.getByName("main").output.classesDirs.first()
@@ -77,38 +82,54 @@ class ProjectContext(private val project: Project) {
         DownloadUtil.downloadIfChanged(URL(url), path.toFile(), project.logger)
     }
 
-    fun apply() {
-//        JavaPlugin.CLASSES_TASK_NAME
-//        val x: Classes
-        val abstractTask = project.task("Abstract") { task ->
-            task.group = "FebbAssembly"
+    open class AbstractTask @Inject constructor(private val context: ProjectContext) : DefaultTask() {
+        private var noVerify: Boolean = false
 
-            task.inputs.properties(project.properties
-                    .filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
-            task.outputs.dir(abstractedDir.toFile())
-            task.outputs.dir(currentVersionAbstractedDirInClasses.toFile())
-            task.outputs.file(runtimeManifestProperties.toFile())
-            task.outputs.file(apiForDevTesting.toFile())
-            task.doLast {
-                val versionManifest = Minecraft.downloadVersionManifest(
-                        Minecraft.downloadVersionManifestList(), mcVersion
-                )
-                downloadMinecraft(versionManifest)
-                downloadMcLibraries(versionManifest)
-                mergeMinecraftJars()
-                downloadMappings()
-                val classpath = libsDir.recursiveChildren().filter { it.hasExtension(".jar") }.toList()
-                val mappings = Files.newBufferedReader(mappingsPath).use { TinyMappingFactory.load(it) }
-                remapMinecraftJar(classpath, mappings)
-
-                abstractMinecraft(classpath + classesOutputDir.toPath(), mappings)
-                copyImplToClassesDir()
-                copyApiForTestingInDev()
+        init {
+            group = "FebbAssembly"
+            with(context) {
+                inputs.properties(project.properties
+                        .filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
+                outputs.dir(abstractedDir.toFile())
+                outputs.dir(currentVersionAbstractedDirInClasses.toFile())
+                outputs.file(runtimeManifestProperties.toFile())
+                outputs.file(apiForDevTesting.toFile())
             }
         }
+
+        @Option(option = "noverify", description = "Don't verify the abstracted jar is valid")
+        fun setNoVerify(noVerify: Boolean) {
+            this.noVerify = noVerify
+        }
+
+        @Input
+        fun getNoVerify(): Boolean {
+            return noVerify
+        }
+
+        @TaskAction
+        fun abstract() = with(context) {
+            val versionManifest = Minecraft.downloadVersionManifest(
+                    Minecraft.downloadVersionManifestList(), mcVersion
+            )
+            downloadMinecraft(versionManifest)
+            downloadMcLibraries(versionManifest)
+            mergeMinecraftJars()
+            downloadMappings()
+            val classpath = libsDir.recursiveChildren().filter { it.hasExtension(".jar") }.toList()
+            val mappings = Files.newBufferedReader(mappingsPath).use { TinyMappingFactory.load(it) }
+            remapMinecraftJar(classpath, mappings)
+
+            abstractMinecraft(classpath + classesOutputDir.toPath(), mappings, verify = !noVerify)
+            copyImplToClassesDir()
+            copyApiForTestingInDev()
+        }
+    }
+
+    fun apply() {
+        val abstractTask = project.tasks.register<AbstractTask>("abstract", AbstractTask::class.java, this)
         // We need the classfiles of FebbAssembly to verify the abstracted impl jar, since we use interfaces
         // from there.
-        abstractTask.dependsOn(project.tasks.getByName("classes"))
         // Make sure Abstract runs before we publish
         project.tasks.getByName("assemble").dependsOn(abstractTask)
     }
@@ -168,17 +189,6 @@ class ProjectContext(private val project: Project) {
         )
     }
 
-//    private fun remapImplJar(classpath: List<Path>, mappings: TinyTree) {
-//        remap(
-//            mappings,
-//            classpath,
-//            fromNamespace = "named",
-//            toNamespace = "intermediary",
-//            fromPath = implNamedJar,
-//            toPath = implIntJar
-//        )
-//    }
-
     private fun remap(
             mappings: TinyTree,
             classpath: List<Path>,
@@ -203,11 +213,12 @@ class ProjectContext(private val project: Project) {
 
     private fun abstractMinecraft(
             classpath: List<Path>,
-            mappings: TinyTree
+            mappings: TinyTree,
+            verify: Boolean
     ) {
         assert(remappedMcPath.exists())
         val metadata = createAbstractionMetadata(classpath)
-        val manifest = runAbstractor(metadata, classpath)
+        val manifest = runAbstractor(metadata, classpath, verify)
         saveManifest(manifest, mappings)
     }
 
@@ -218,18 +229,18 @@ class ProjectContext(private val project: Project) {
             val imap = HashMap<String, Collection<String>>()
             val iinterfaceProperties = Properties()
             iinterfaceProperties.load(iinterfacesPath.inputStream())
-            iinterfaceProperties.forEach {a, b ->
+            iinterfaceProperties.forEach { a, b ->
                 imap[a.toString()] = b.toString().split(",")
             }
 
             val baseMap = HashMap<String, Collection<String>>()
             val interfaceBaseProperties = Properties()
             interfaceBaseProperties.load(baseinterfacesPath.inputStream())
-            interfaceBaseProperties.forEach {a, b ->
+            interfaceBaseProperties.forEach { a, b ->
                 baseMap[a.toString()] = b.toString().split(",")
             }
 
-             AbstractionMetadata(
+            AbstractionMetadata(
                     versionPackage = VersionPackage.fromMcVersion(mcVersion),
                     writeRawAsm = true,
                     fitToPublicApi = false,
@@ -246,7 +257,8 @@ class ProjectContext(private val project: Project) {
 
     private fun runAbstractor(
             metadata: AbstractionMetadata,
-            classpath: List<Path>
+            classpath: List<Path>,
+            verify: Boolean
     ): AbstractionManifest {
         abstractedDirectOutputDir.createDirectories()
         val manifest = Abstractor.parse(mcJar = remappedMcPath, metadata = metadata) {
@@ -257,7 +269,10 @@ class ProjectContext(private val project: Project) {
         }
 
         deleteOldAbstractedClassesInClassesDir()
-        verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath, classesOutputDir.toPath()))
+        if (verify) {
+            println("Verifying abstracted jar...")
+            verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath, classesOutputDir.toPath()))
+        }
 //        implNamedDir.convertDirToJar(implNamedJar)
         apiBinariesDir.convertDirToJar(apiBinariesJar)
         apiSourcesDir.convertDirToJar(apiSourcesJar)
@@ -307,11 +322,11 @@ class ProjectContext(private val project: Project) {
 
 }
 
-fun <T> getResources(path1: String, path2: String, path3: String, path4: String, usage: (Path, Path, Path, Path) -> T) :T {
+fun <T> getResources(path1: String, path2: String, path3: String, path4: String, usage: (Path, Path, Path, Path) -> T): T {
     return getResource(path1) { r1 ->
         getResource(path2) { r2 ->
             getResource(path3) { r3 ->
-                getResource(path4) {r4 -> usage(r1, r2, r3, r4)}
+                getResource(path4) { r4 -> usage(r1, r2, r3, r4) }
             }
         }
     }

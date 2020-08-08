@@ -15,6 +15,7 @@
     "context.scheduledtick.ScheduledTickMixin",
     "context.scheduledtick.ServerTickSchedulerMixin",
     "context.scheduledtick.ServerWorldMixin",
+    "context.server.MinecraftServerMixin",
     "context.syncedBlockEvents.BlockEventMixin",
     "context.syncedBlockEvents.ServerWorldMixin",
     "data.CompoundTagMixin_NBTag"

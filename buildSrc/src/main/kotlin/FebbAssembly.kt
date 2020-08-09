@@ -11,16 +11,14 @@ import net.fabricmc.stitch.merge.JarMerger
 import net.fabricmc.tinyremapper.OutputConsumerPath
 import net.fabricmc.tinyremapper.TinyRemapper
 import org.apache.commons.io.FileUtils
-import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
-import org.gradle.api.tasks.TaskAction
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
-import javax.inject.Inject
 import kotlin.collections.HashMap
 
 class FebbAssembly : Plugin<Project> {
@@ -37,16 +35,18 @@ class FebbAssembly : Plugin<Project> {
 }
 
 
-class ProjectContext(private val project: Project) {
+class ProjectContext(val project: Project) {
     private val sourceSets = project.convention.getPlugin(JavaPluginConvention::class.java).sourceSets
     private val resourcesOutputDir = sourceSets.getByName("main").output.resourcesDir!!
-    private val classesOutputDir = sourceSets.getByName("main").output.classesDirs.first()
+    private val classesOutputDir = sourceSets.getByName("main").output.classesDirs.first().toPath()
 //    final SourceSetContainer sourceSets = javaPlugin.getSourceSets();
 
     private val mcVersion = project.property("minecraft_version").toString()
     private val mappingsBuild = project.property("mappings_build").toString().toInt()
+    private val apiBuild = project.property("api_build").toString().toInt()
     private val febbDir = project.buildDir.resolve("febbAssembly").toPath()
     private val versionDir = febbDir.resolve(mcVersion)
+    private val minecraftVersionManifest = versionDir.resolve("version_manifest.json")
     private val minecraftDir = versionDir.resolve("minecraft")
     private val clientPath = minecraftDir.resolve("client.jar")
     private val serverPath = minecraftDir.resolve("server.jar")
@@ -66,7 +66,7 @@ class ProjectContext(private val project: Project) {
     private val implNamedDir = abstractedDirectOutputDir.resolve("impl-named")
 
     private val runtimeManifestProperties = resourcesOutputDir.resolve("runtimeManifest.properties").toPath()
-    private val implNamedDest = classesOutputDir.toPath()
+    private val implNamedDest = classesOutputDir
     private val currentVersionAbstractedDirInClasses = implNamedDest.resolve("v" + mcVersion.replace(".", "_"))
 
     private val apiForDevTesting = project.file("dev/test-api.jar").toPath()
@@ -75,78 +75,146 @@ class ProjectContext(private val project: Project) {
 
     private val abstractionManifestJar = abstractedDir.resolve("abstractionManifest.jar")
 
+    private val classpath by lazy { libsDir.recursiveChildren().filter { it.hasExtension(".jar") }.toList() }
+    private val mappings by lazy { Files.newBufferedReader(mappingsPath).use { TinyMappingFactory.load(it) } }
 
     private fun downloadIfChanged(url: String, path: Path) {
         DownloadUtil.downloadIfChanged(URL(url), path.toFile(), project.logger)
     }
 
-    open class AbstractTask @Inject constructor(private val context: ProjectContext) : DefaultTask() {
-//        private var noVerify: Boolean = false
+//    open class AbstractTask @Inject constructor(private val context: ProjectContext) : DefaultTask() {
+////        private var noVerify: Boolean = false
+//
+//        init {
+//            group = "FebbAssembly"
+//            with(context) {
+//                inputs.properties(project.properties
+//                        .filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
+//                outputs.dir(abstractedDir.toFile())
+//                outputs.dir(currentVersionAbstractedDirInClasses.toFile())
+//                outputs.file(runtimeManifestProperties.toFile())
+//                outputs.file(apiForDevTesting.toFile())
+//
+//
+//            }
+//        }
+//
+//
+//        @TaskAction
+//        fun abstract() = with(context) {
+////            val versionManifest = Minecraft.downloadVersionManifest(
+////                    Minecraft.downloadVersionManifestList(), mcVersion
+////            )
+////            downloadMinecraft(versionManifest)
+////            downloadMcLibraries(versionManifest)
+////            mergeMinecraftJars()
+////            downloadMappings()
+////            remapMinecraftJar(classpath, mappings)
+//
+////            abstractMinecraft(classpath + classesOutputDir.toPath(), mappings)
+////            copyImplToClassesDir()
+////            copyApiForTestingInDev()
+//        }
+//
+//    }
 
-        init {
-            group = "FebbAssembly"
-            with(context) {
-                inputs.properties(project.properties
-                        .filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
-                outputs.dir(abstractedDir.toFile())
-                outputs.dir(currentVersionAbstractedDirInClasses.toFile())
-                outputs.file(runtimeManifestProperties.toFile())
-                outputs.file(apiForDevTesting.toFile())
 
-
+    fun apply() {
+//        val abstractTask = project.tasks.register<AbstractTask>("abstract", AbstractTask::class.java, this)
+        val downloadVersionManifest by task {
+            setPropertyInputs("mcVersion" to mcVersion)
+            setFileOutputs(minecraftVersionManifest)
+            doLast {
+                val versionManifest = Minecraft.downloadVersionManifest(
+                        Minecraft.downloadVersionManifestList(), mcVersion
+                )
+                minecraftVersionManifest.writeString(versionManifest.toString())
+            }
+        }
+        val downloadMinecraft by task(downloadVersionManifest) {
+            setFileInputs(minecraftVersionManifest)
+            setFileOutputs(clientPath, serverPath)
+            doLast {
+                downloadMinecraft(readVersionManifest())
+            }
+        }
+        val downloadMcLibraries by task(downloadVersionManifest) {
+            setFileInputs(minecraftVersionManifest)
+            setDirOutputs(libsDir)
+            doLast {
+                downloadMcLibraries(readVersionManifest())
+            }
+        }
+        val mergeMcJars by task(downloadMinecraft) {
+            setFileInputs(clientPath, serverPath)
+            setFileOutputs(mergedPath)
+            doLast {
+                mergeMinecraftJars()
+            }
+        }
+        val downloadMappings by task {
+            setPropertyInputs("mcVersion" to mcVersion, "mappings" to mappingsBuild)
+            setDirOutputs(mappingsDir)
+            doLast {
+                downloadMappings()
+            }
+        }
+        val remapMcJar by task(mergeMcJars, downloadMappings, downloadMcLibraries) {
+            setFileInputs(mergedPath, mappingsPath)
+            setDirInputs(libsDir)
+            setFileOutputs(remappedMcPath)
+            doLast {
+                remapMinecraftJar(classpath, mappings)
+            }
+        }
+        val abstract by task(remapMcJar, project.tasks.getByName("processResources")) {
+            setPropertyInputs("apiBuild" to apiBuild)
+            setFileInputs(mergedPath, mappingsPath)
+            setDirInputs(libsDir)
+            setDirOutputs(abstractedDir)
+            val resourcesDir = Paths.get("buildSrc/src/resources")
+            if (resourcesDir.exists()) {
+                setDirInputs(resourcesDir)
+            }
+            doLast {
+                abstractMinecraft(classpath, mappings)
+            }
+        }
+        val setupDev by task(abstract) {
+            setDirInputs(abstractedDir)
+            setDirOutputs(currentVersionAbstractedDirInClasses)
+            setFileOutputs(apiForDevTesting)
+            doLast {
+                copyImplToClassesDir()
+                copyApiForTestingInDev()
             }
         }
 
-//        @Option(option = "noverify", description = "Don't verify the abstracted jar is valid")
-//        fun setNoVerify(noVerify: Boolean) {
-//            this.noVerify = noVerify
-//        }
-//
-//        @Input
-//        fun getNoVerify(): Boolean {
-//            return noVerify
-//        }
-
-        @TaskAction
-        fun abstract() = with(context) {
-            val versionManifest = Minecraft.downloadVersionManifest(
-                    Minecraft.downloadVersionManifestList(), mcVersion
-            )
-            downloadMinecraft(versionManifest)
-            downloadMcLibraries(versionManifest)
-            mergeMinecraftJars()
-            downloadMappings()
-            val classpath = buildClasspath()
-            val mappings = Files.newBufferedReader(mappingsPath).use { TinyMappingFactory.load(it) }
-            remapMinecraftJar(classpath, mappings)
-
-            abstractMinecraft(classpath + classesOutputDir.toPath(), mappings)
-            copyImplToClassesDir()
-            copyApiForTestingInDev()
+        val verifyAbstractedJar by task(setupDev, project.tasks.getByName("classes")) {
+            setDirInputs(implNamedDir, libsDir, classesOutputDir)
+            setFileInputs(remappedMcPath)
+            doLast {
+                verifyAbstractedJar()
+            }
         }
 
-    }
 
-    private fun buildClasspath() = libsDir.recursiveChildren().filter { it.hasExtension(".jar") }.toList()
-
-    private fun verifyAbstractedJar() {
-        val classpath = buildClasspath()
-        println("Verifying abstracted jar...")
-        verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath, classesOutputDir.toPath()))
-    }
-
-    fun apply() {
-        val abstractTask = project.tasks.register<AbstractTask>("abstract", AbstractTask::class.java, this)
-        project.tasks.getByName("build").doLast {
-            verifyAbstractedJar()
-        }
+        project.tasks.getByName("build").dependsOn(verifyAbstractedJar)
 
         // We need the classfiles of FebbAssembly to verify the abstracted impl jar, since we use interfaces
         // from there.
         // Make sure Abstract runs before we publish
-        project.tasks.getByName("prepareKotlinBuildScriptModel").dependsOn(abstractTask)
-        project.tasks.getByName("classes").dependsOn(abstractTask)
+        project.tasks.getByName("prepareKotlinBuildScriptModel").dependsOn(setupDev)
+        project.tasks.getByName("classes").dependsOn(setupDev)
     }
+
+    private fun verifyAbstractedJar() {
+        println("Verifying abstracted jar...")
+        verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath, classesOutputDir))
+    }
+
+    private fun readVersionManifest(): JsonObject =
+            Json(JsonConfiguration.Stable).parseJson(minecraftVersionManifest.readToString()).jsonObject
 
     private fun copyApiForTestingInDev() {
         apiForDevTesting.createParentDirectories()
@@ -231,7 +299,7 @@ class ProjectContext(private val project: Project) {
     ) {
         assert(remappedMcPath.exists())
         val metadata = createAbstractionMetadata(classpath)
-        val manifest = runAbstractor(metadata, classpath)
+        val manifest = runAbstractor(metadata)
         saveManifest(manifest, mappings)
     }
 
@@ -269,8 +337,7 @@ class ProjectContext(private val project: Project) {
     }
 
     private fun runAbstractor(
-            metadata: AbstractionMetadata,
-            classpath: List<Path>
+            metadata: AbstractionMetadata
     ): AbstractionManifest {
         abstractedDirectOutputDir.createDirectories()
         val manifest = Abstractor.parse(mcJar = remappedMcPath, metadata = metadata) {
@@ -288,11 +355,13 @@ class ProjectContext(private val project: Project) {
     }
 
     private fun deleteOldAbstractedClassesInClassesDir() {
-        classesOutputDir.toPath().directChildren().forEach {
-            // we assume only api classes start with "v". If we accidently name something with a root package
-            // of "vaccum" it will be a very sad day.
-            if (it.toString().startsWith("v")) {
-                it.deleteRecursively()
+        if (classesOutputDir.exists()) {
+            classesOutputDir.directChildren().forEach {
+                // we assume only api classes start with "v". If we accidently name something with a root package
+                // of "vaccum" it will be a very sad day.
+                if (it.toString().startsWith("v")) {
+                    it.deleteRecursively()
+                }
             }
         }
     }

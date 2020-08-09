@@ -11,7 +11,14 @@ repositories {
         url = 'https://raw.githubusercontent.com/Devan-Kerman/Devan-Repo/master/'
     }
     maven { url = "https://dl.bintray.com/febb/maven" }
-    maven { url 'https://jitpack.io' }
+    maven {
+        url 'https://jitpack.io'
+        content {
+            // this repository *only* contains artifacts with group "my.company"
+            includeGroup "net.devtech"
+            includeGroup "com.github.Chocohead"
+        }
+    }
     flatDir {
         dirs 'mods/'
     }

@@ -17,7 +17,6 @@ import org.gradle.api.plugins.JavaPluginConvention
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -77,6 +76,11 @@ class ProjectContext(val project: Project) {
 
     private val classpath by lazy { libsDir.recursiveChildren().filter { it.hasExtension(".jar") }.toList() }
     private val mappings by lazy { Files.newBufferedReader(mappingsPath).use { TinyMappingFactory.load(it) } }
+    private val configDir = project.projectDir.toPath().resolve("config")
+    private val interfaceAbstractions = configDir.resolve("interfaces.conf").toAbsolutePath()
+    private val baseclassAbstractions = configDir.resolve("baseclasses.conf")
+    private val addedInterfaces = configDir.resolve("iinterfaces.properties")
+    private val addedBaseclasses = configDir.resolve("baseinterfaces.properties")
 
     private fun downloadIfChanged(url: String, path: Path) {
         DownloadUtil.downloadIfChanged(URL(url), path.toFile(), project.logger)
@@ -170,12 +174,9 @@ class ProjectContext(val project: Project) {
         val abstract by task(remapMcJar, project.tasks.getByName("processResources")) {
             setPropertyInputs("apiBuild" to apiBuild)
             setFileInputs(mergedPath, mappingsPath)
-            setDirInputs(libsDir)
+            setDirInputs(libsDir,configDir)
             setDirOutputs(abstractedDir)
-            val resourcesDir = Paths.get("buildSrc/src/resources")
-            if (resourcesDir.exists()) {
-                setDirInputs(resourcesDir)
-            }
+
             doLast {
                 abstractMinecraft(classpath, mappings)
             }
@@ -304,36 +305,33 @@ class ProjectContext(val project: Project) {
     }
 
     private fun createAbstractionMetadata(classpath: List<Path>): AbstractionMetadata {
-        return getResources("interfaces.conf", "baseclasses.conf", "iinterfaces.properties", "baseinterfaces.properties") { interfaces, baseclasses, iinterfacesPath, baseinterfacesPath ->
-            val interfaceSelection = AbstractionSelection.fromHocon(interfaces.readToString())
-            val baseclassSelection = AbstractionSelection.fromHocon(baseclasses.readToString())
-            val imap = HashMap<String, Collection<String>>()
-            val iinterfaceProperties = Properties()
-            iinterfaceProperties.load(iinterfacesPath.inputStream())
-            iinterfaceProperties.forEach { a, b ->
-                imap[a.toString()] = b.toString().split(",")
-            }
-
-            val baseMap = HashMap<String, Collection<String>>()
-            val interfaceBaseProperties = Properties()
-            interfaceBaseProperties.load(baseinterfacesPath.inputStream())
-            interfaceBaseProperties.forEach { a, b ->
-                baseMap[a.toString()] = b.toString().split(",")
-            }
-
-            AbstractionMetadata(
-                    versionPackage = VersionPackage.fromMcVersion(mcVersion),
-                    writeRawAsm = true,
-                    fitToPublicApi = false,
-                    classPath = classpath,
-                    javadocs = JavaDocs.readTiny(mappingsPath),
-                    selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector(),
-                    iinterfaces = imap,
-                    interfacesbase = baseMap
-            )
+//          interfaces, baseclasses, iinterfacesPath, baseinterfacesPath ->
+        val interfaceSelection = AbstractionSelection.fromHocon(interfaceAbstractions.readToString())
+        val baseclassSelection = AbstractionSelection.fromHocon(baseclassAbstractions.readToString())
+        val imap = HashMap<String, Collection<String>>()
+        val iinterfaceProperties = Properties()
+        iinterfaceProperties.load(addedInterfaces.inputStream())
+        iinterfaceProperties.forEach { a, b ->
+            imap[a.toString()] = b.toString().split(",")
         }
 
+        val baseMap = HashMap<String, Collection<String>>()
+        val interfaceBaseProperties = Properties()
+        interfaceBaseProperties.load(addedBaseclasses.inputStream())
+        interfaceBaseProperties.forEach { a, b ->
+            baseMap[a.toString()] = b.toString().split(",")
+        }
 
+        return AbstractionMetadata(
+                versionPackage = VersionPackage.fromMcVersion(mcVersion),
+                writeRawAsm = true,
+                fitToPublicApi = false,
+                classPath = classpath,
+                javadocs = JavaDocs.readTiny(mappingsPath),
+                selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector(),
+                iinterfaces = imap,
+                interfacesbase = baseMap
+        )
     }
 
     private fun runAbstractor(

@@ -5,6 +5,9 @@ plugins {
     id "com.jfrog.bintray" version "1.8.5"
 }
 
+test {
+    workingDir = 'testRun'
+}
 
 repositories {
     maven {
@@ -80,6 +83,8 @@ dependencies {
         modRuntime name
         modImplementation name
     }
+
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
 
     afterEvaluate {
         testmodCompile project

@@ -101,6 +101,12 @@ public interface NBTag {
 	<T> void put(@Nullable Version version, Type<T> type, String key, T value);
 
 	final class Type<T> {
+		private static final Map<Class<?>, Type<?>> CLASS_TYPE_MAP = new HashMap<>();
+		/**
+		 * @deprecated internal
+		 */
+		@SuppressWarnings ("DeprecatedIsStillUsed") @Deprecated private static final Int2ObjectBiMap<Type<?>> NBT_ID_TYPE_MAP = new Int2ObjectBiMap<>(256);
+
 		// keep these first so they're overriden
 		public static final Type<Boolean> BOOLEAN = new Type<>(Boolean.class, NbtType.BYTE);
 		public static final Type<Character> CHAR = new Type<>(Character.class, NbtType.SHORT);
@@ -116,11 +122,6 @@ public interface NBTag {
 		public static final Type<NBTag> COMPOUND = new Type<>(NBTag.class, NbtType.COMPOUND);
 		public static final Type<int[]> INT_ARRAY = new Type<>(int[].class, NbtType.INT_ARRAY);
 		public static final Type<long[]> LONG_ARRAY = new Type<>(long[].class, NbtType.LONG_ARRAY);
-		private static final Map<Class<?>, Type<?>> CLASS_TYPE_MAP = new HashMap<>();
-		/**
-		 * @deprecated internal
-		 */
-		@SuppressWarnings ("DeprecatedIsStillUsed") @Deprecated private static final Int2ObjectBiMap<Type<?>> NBT_ID_TYPE_MAP = new Int2ObjectBiMap<>(256);
 
 		private final Class<T> type;
 		private final byte nbtId;

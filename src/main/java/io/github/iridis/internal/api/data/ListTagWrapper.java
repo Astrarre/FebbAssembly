@@ -26,7 +26,7 @@ public class ListTagWrapper<T> extends AbstractList<T> implements NBTList<T> {
 
 	@Override
 	public void add(int index, T element) {
-		this.tags.add(index, TagUtil.fromObject(this.tags.get(index)));
+		this.tags.add(index, TagUtil.fromObject(element));
 	}
 
 	@Override

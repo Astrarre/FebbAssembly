@@ -8,7 +8,6 @@
     "context.blockentity.WorldMixin",
     "context.entity.EntityMixin",
     "context.entity.MobEntityMixin",
-    "context.entity.ProjectileEntityMixin",
     "context.entity.ServerWorldMixin",
     "context.interact.ServerPlayerInteractionManagerMixin",
     "context.itemstack.ItemStackMixin",

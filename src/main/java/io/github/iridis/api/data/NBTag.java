@@ -1,13 +1,17 @@
 package io.github.iridis.api.data;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.github.iridis.internal.api.data.ListTagWrapper;
+import io.github.iridis.internal.asm.mixin.access.ListTagAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.util.collection.Int2ObjectBiMap;
 
 import net.fabricmc.fabric.api.util.NbtType;
@@ -21,6 +25,14 @@ public interface NBTag {
 	 */
 	static NBTag create() {
 		return (NBTag) new CompoundTag();
+	}
+
+	/**
+	 * create a list of nbt elements
+	 * @param type the component type
+	 */
+	static <T> NBTList<T> createListTag(Type<T> type) {
+		return new ListTagWrapper<>(ListTagAccessor.createListTag(new ArrayList<>(), type.nbtId));
 	}
 
 	/**
@@ -111,12 +123,12 @@ public interface NBTag {
 		@SuppressWarnings ("DeprecatedIsStillUsed") @Deprecated private static final Int2ObjectBiMap<Type<?>> NBT_ID_TYPE_MAP = new Int2ObjectBiMap<>(256);
 
 		private final Class<T> type;
-		private final int nbtId;
-		private Type<List<T>> listType;
+		private final byte nbtId;
+		private Type<NBTList<T>> listType;
 
 		private Type(Class<T> type, int id) {
 			this.type = type;
-			this.nbtId = id;
+			this.nbtId = (byte) id;
 			if (type != List.class) {
 				NBT_ID_TYPE_MAP.put(this, id);
 				CLASS_TYPE_MAP.put(type, this);
@@ -157,9 +169,9 @@ public interface NBTag {
 				"unchecked",
 				"rawtypes"
 		})
-		public Type<List<T>> getListType() {
+		public Type<NBTList<T>> getListType() {
 			if (this.listType == null) {
-				return this.listType = new Type<List<T>>((Class) List.class, NbtType.LIST);
+				return this.listType = new Type<NBTList<T>>((Class) NBTList.class, NbtType.LIST);
 			}
 			return this.listType;
 		}
@@ -168,7 +180,7 @@ public interface NBTag {
 		 * @deprecated internal
 		 */
 		@Deprecated
-		public int getNbtId() {
+		public byte getNbtId() {
 			return this.nbtId;
 		}
 	}

@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.github.iridis.api.data.NBTag;
-import io.github.iridis.internal.api.data.InternalTag;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.devtech.nanoevents.util.Id;
+import v1_16_1.net.minecraft.nbt.ICompoundTag;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,7 +25,7 @@ public class ContextSerialization {
 		/**
 		 * serialize the object
 		 */
-		NBTag to();
+		ICompoundTag to();
 
 		/**
 		 * @return the id of the reader
@@ -42,7 +42,7 @@ public class ContextSerialization {
 		 * guaranteed to exist at read time, for example if a player leaves some data in the ContextManager, then leaves the game, the reader has the
 		 * freedom to deserialize it as an OfflinePlayer, instead of a PlayerEntity
 		 */
-		Object from(ContextManager manager, NBTag data);
+		Object from(ContextManager manager, ICompoundTag data);
 	}
 
 	public static void register(Id id, Readable readable) {
@@ -64,12 +64,12 @@ public class ContextSerialization {
 		if (context != null) {
 			for (Object o : context) {
 				if (o instanceof ContextSerialization.Writable) {
-					NBTag toWrite = ((ContextSerialization.Writable) o).to();
-					if (toWrite instanceof InternalTag) {
+					ICompoundTag toWrite = ((ContextSerialization.Writable) o).to();
+					if (toWrite instanceof CompoundTag) {
 						Id id = ((ContextSerialization.Writable) o).id();
 						toWrite.put(NBTag.Type.STRING, "ser_modid", id.mod);
 						toWrite.put(NBTag.Type.STRING, "ser_value", id.value);
-						tags.add(((InternalTag) toWrite).getInternal());
+						tags.add(((CompoundTag) toWrite));
 					} else {
 						throw new IllegalArgumentException(o + "'s ContextSerialization.Writable#to returned a non-internaltag NBTag instance!");
 					}
@@ -89,7 +89,7 @@ public class ContextSerialization {
 			CompoundTag data = tags.getCompound(i);
 			Id id = new Id(data.getString("ser_modid"), data.getString("ser_value"));
 			ContextSerialization.Readable readable = ContextSerialization.get(id);
-			Object obj = readable.from(ContextManager.getInstance(), (NBTag) data);
+			Object obj = readable.from(ContextManager.getInstance(), (ICompoundTag) data);
 			list.set(i, obj);
 		}
 		return list;

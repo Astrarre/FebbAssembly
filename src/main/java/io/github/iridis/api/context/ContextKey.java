@@ -2,8 +2,8 @@ package io.github.iridis.api.context;
 
 import java.util.Objects;
 
-import io.github.iridis.api.data.NBTag;
 import net.devtech.nanoevents.util.Id;
+import v1_16_1.net.minecraft.nbt.ICompoundTag;
 
 public class ContextKey<T> {
 	protected final String key;
@@ -27,7 +27,7 @@ public class ContextKey<T> {
 		}
 
 		@Override
-		public NBTag to() {
+		public ICompoundTag to() {
 			return ((ContextSerialization.Writable) this.object).to();
 		}
 

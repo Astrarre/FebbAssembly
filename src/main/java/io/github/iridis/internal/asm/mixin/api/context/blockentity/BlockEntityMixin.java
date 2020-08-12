@@ -1,12 +1,8 @@
 package io.github.iridis.internal.asm.mixin.api.context.blockentity;
 
-import io.github.iridis.api.context.ContextManager;
 import io.github.iridis.api.context.ContextSerialization;
-import io.github.iridis.api.data.NBTag;
-import io.github.iridis.internal.api.data.InternalTag;
 import io.github.iridis.internal.asm.access.ContextHolderAccess;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.devtech.nanoevents.util.Id;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

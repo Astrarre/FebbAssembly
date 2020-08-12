@@ -16,6 +16,7 @@ import io.github.iridis.internal.asm.mixin.access.PlayerManagerAccess;
 import net.devtech.nanoevents.util.Id;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import v1_16_1.net.minecraft.nbt.ICompoundTag;
 import v1_16_1.net.minecraft.server.IMinecraftServer;
 import v1_16_1.net.minecraft.server.IPlayerManager;
 import v1_16_1.net.minecraft.server.network.IServerPlayerEntity;
@@ -96,7 +97,7 @@ public class OfflinePlayer implements ContextSerialization.Writable, Player {
 	}
 
 	@Override
-	public NBTag to() {
+	public ICompoundTag to() {
 		return NBTagUtil.to(this.getId());
 	}
 

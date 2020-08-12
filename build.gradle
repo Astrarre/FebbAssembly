@@ -45,6 +45,11 @@ sourceSets {
         compileClasspath += main.compileClasspath
         runtimeClasspath += main.runtimeClasspath
     }
+
+    test {
+        compileClasspath += main.compileClasspath
+        runtimeClasspath += main.runtimeClasspath
+    }
 }
 
 dependencies {
@@ -82,12 +87,15 @@ dependencies {
         System.out.println("Found test mod: " + it.name.replace(".jar", "") + " -> " + name)
         modRuntime name
         modImplementation name
+        testImplementation name
+        testmodImplementation name
     }
 
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 
     afterEvaluate {
         testmodCompile project
+        testCompile project
         //testmodCompile project("${it.name}:").sourceSets.testmod.output
     }
 }

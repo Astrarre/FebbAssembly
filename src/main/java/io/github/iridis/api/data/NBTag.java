@@ -1,5 +1,8 @@
 package io.github.iridis.api.data;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,9 +12,11 @@ import io.github.iridis.internal.api.data.ListTagWrapper;
 import io.github.iridis.internal.asm.mixin.access.ListTagAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import v1_16_1.net.minecraft.nbt.ICompoundTag;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.PositionTracker;
 import net.minecraft.util.collection.Int2ObjectBiMap;
 
 import net.fabricmc.fabric.api.util.NbtType;
@@ -20,11 +25,15 @@ import net.fabricmc.fabric.api.util.NbtType;
  * @implNote create a wrapper class for CompoundTag when a key name changes
  */
 public interface NBTag {
+	static ICompoundTag read(DataInput input) throws IOException {
+		return (ICompoundTag) NbtIo.read(input, PositionTracker.DEFAULT);
+	}
+
 	/**
 	 * create a new empty NBTag
 	 */
-	static NBTag create() {
-		return (NBTag) new CompoundTag();
+	static ICompoundTag create() {
+		return (ICompoundTag) new CompoundTag();
 	}
 
 	/**
@@ -40,14 +49,14 @@ public interface NBTag {
 	 *
 	 * @return the newly created tag, or the current tag for that key
 	 */
-	NBTag makeCompound(@Nullable Version version, String key);
+	ICompoundTag makeCompound(@Nullable Version version, String key);
 
 	/**
 	 * create a new list tag for a minecraft version, this is used for nested values
 	 *
 	 * @return the newly created tag, or the current tag for that key
 	 */
-	List<NBTag> makeList(@Nullable Version version, String key);
+	List<ICompoundTag> makeList(@Nullable Version version, String key);
 
 	/**
 	 * get the type in the given key
@@ -119,7 +128,7 @@ public interface NBTag {
 		public static final Type<Double> DOUBLE = new Type<>(Double.class, NbtType.DOUBLE);
 		public static final Type<byte[]> BYTE_ARRAY = new Type<>(byte[].class, NbtType.BYTE_ARRAY);
 		public static final Type<String> STRING = new Type<>(String.class, NbtType.STRING);
-		public static final Type<NBTag> COMPOUND = new Type<>(NBTag.class, NbtType.COMPOUND);
+		public static final Type<ICompoundTag> COMPOUND = new Type<>(ICompoundTag.class, NbtType.COMPOUND);
 		public static final Type<int[]> INT_ARRAY = new Type<>(int[].class, NbtType.INT_ARRAY);
 		public static final Type<long[]> LONG_ARRAY = new Type<>(long[].class, NbtType.LONG_ARRAY);
 

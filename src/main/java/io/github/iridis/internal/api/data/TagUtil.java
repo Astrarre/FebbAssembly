@@ -10,6 +10,7 @@ import net.minecraft.nbt.AbstractListTag;
 import net.minecraft.nbt.AbstractNumberTag;
 import net.minecraft.nbt.ByteArrayTag;
 import net.minecraft.nbt.ByteTag;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.IntArrayTag;
@@ -72,8 +73,8 @@ public class TagUtil {
 			return LongTag.of((Long) tag);
 		} else if(tag instanceof Double) {
 			return DoubleTag.of((Double) tag);
-		} else if(tag instanceof InternalTag) {
-			return ((InternalTag) tag).getInternal();
+		} else if(tag instanceof CompoundTag) {
+			return ((CompoundTag) tag);
 		} else if(tag instanceof NBTList) {
 			return ((NBTList) tag).get();
 		} else if(tag instanceof String) {

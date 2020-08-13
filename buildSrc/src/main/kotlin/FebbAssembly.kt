@@ -86,45 +86,8 @@ class ProjectContext(val project: Project) {
         DownloadUtil.downloadIfChanged(URL(url), path.toFile(), project.logger)
     }
 
-//    open class AbstractTask @Inject constructor(private val context: ProjectContext) : DefaultTask() {
-////        private var noVerify: Boolean = false
-//
-//        init {
-//            group = "FebbAssembly"
-//            with(context) {
-//                inputs.properties(project.properties
-//                        .filterKeys { it in setOf("minecraft_version", "mappings_build", "api_build") })
-//                outputs.dir(abstractedDir.toFile())
-//                outputs.dir(currentVersionAbstractedDirInClasses.toFile())
-//                outputs.file(runtimeManifestProperties.toFile())
-//                outputs.file(apiForDevTesting.toFile())
-//
-//
-//            }
-//        }
-//
-//
-//        @TaskAction
-//        fun abstract() = with(context) {
-////            val versionManifest = Minecraft.downloadVersionManifest(
-////                    Minecraft.downloadVersionManifestList(), mcVersion
-////            )
-////            downloadMinecraft(versionManifest)
-////            downloadMcLibraries(versionManifest)
-////            mergeMinecraftJars()
-////            downloadMappings()
-////            remapMinecraftJar(classpath, mappings)
-//
-////            abstractMinecraft(classpath + classesOutputDir.toPath(), mappings)
-////            copyImplToClassesDir()
-////            copyApiForTestingInDev()
-//        }
-//
-//    }
-
 
     fun apply() {
-//        val abstractTask = project.tasks.register<AbstractTask>("abstract", AbstractTask::class.java, this)
         val downloadVersionManifest by task {
             setPropertyInputs("mcVersion" to mcVersion)
             setFileOutputs(minecraftVersionManifest)

@@ -13,11 +13,11 @@ data class AbstractionSelections(val interfaces: AbstractionSelection, val basec
         fun String.selectedAbstractionType(
             classApi: ClassApi, memberSelectionsProperty: (CompiledAbstractedClass) -> List<Regex>?
         ): MemberAbstractionType {
-            val selectedForBaseclass = isSelected(classApi, compiledInterfaces, memberSelectionsProperty)
-            val selectedForInterface = isSelected(classApi, compiledBaseclasses, memberSelectionsProperty)
+            val selectedForBaseclass = isSelected(classApi, compiledBaseclasses, memberSelectionsProperty)
+            val selectedForInterface = isSelected(classApi, compiledInterfaces, memberSelectionsProperty)
 
             return when {
-                selectedForBaseclass && selectedForBaseclass -> MemberAbstractionType.BaseclassAndInterface
+                selectedForBaseclass && selectedForInterface -> MemberAbstractionType.BaseclassAndInterface
                 selectedForBaseclass -> MemberAbstractionType.Baseclass
                 selectedForInterface -> MemberAbstractionType.Interface
                 else -> MemberAbstractionType.None

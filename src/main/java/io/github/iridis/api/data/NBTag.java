@@ -25,8 +25,18 @@ import net.fabricmc.fabric.api.util.NbtType;
  * @implNote create a wrapper class for CompoundTag when a key name changes
  */
 public interface NBTag {
+	/**
+	 * deserializes an nbt tag from a stream of bytes
+	 */
 	static ICompoundTag read(DataInput input) throws IOException {
 		return (ICompoundTag) NbtIo.read(input, PositionTracker.DEFAULT);
+	}
+
+	/**
+	 * serializes the nbt data of this object to a stream of bytes
+	 */
+	default void writeData(DataOutput output) throws IOException {
+		NbtIo.write((CompoundTag)this, output);
 	}
 
 	/**

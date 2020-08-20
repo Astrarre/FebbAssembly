@@ -85,7 +85,6 @@ dependencies {
         String name = "testmod:${baseName}:${version}"
 
         System.out.println("Found test mod: " + it.name.replace(".jar", "") + " -> " + name)
-        modRuntime name
         modImplementation name
         testImplementation name
         testmodImplementation name

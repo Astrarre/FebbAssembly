@@ -57,7 +57,7 @@ public class NBTagTest {
 		tag.put(NBTag.Type.LONG, "long", 0L);
 		tag.put(NBTag.Type.DOUBLE, "double", 0d);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		tag.write(new DataOutputStream(baos));
+		tag.writeData(new DataOutputStream(baos));
 		ICompoundTag ctag = NBTag.read(new DataInputStream(new ByteArrayInputStream(baos.toByteArray())));
 		Assert.assertEquals(tag, ctag);
 	}

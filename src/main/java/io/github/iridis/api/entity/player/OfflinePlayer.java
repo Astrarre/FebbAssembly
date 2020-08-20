@@ -8,10 +8,8 @@ import java.util.stream.Collectors;
 import com.mojang.authlib.GameProfile;
 import io.github.iridis.api.context.ContextManager;
 import io.github.iridis.api.context.ContextSerialization;
-import io.github.iridis.api.data.NBTag;
 import io.github.iridis.api.entity.Player;
 import io.github.iridis.api.util.TriId;
-import io.github.iridis.internal.api.data.NBTagUtil;
 import io.github.iridis.internal.asm.mixin.access.PlayerManagerAccess;
 import net.devtech.nanoevents.util.Id;
 import org.jetbrains.annotations.NotNull;
@@ -21,6 +19,8 @@ import v1_16_1.net.minecraft.server.IMinecraftServer;
 import v1_16_1.net.minecraft.server.IPlayerManager;
 import v1_16_1.net.minecraft.server.network.IServerPlayerEntity;
 
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class OfflinePlayer implements ContextSerialization.Writable, Player {
@@ -28,7 +28,7 @@ public class OfflinePlayer implements ContextSerialization.Writable, Player {
 
 	static {
 		ContextSerialization.register(OFFLINE_PLAYER_ID, (c, t) -> {
-			UUID uuid = NBTagUtil.uuidFrom(t);
+			UUID uuid = NbtHelper.toUuid((Tag) t);
 			return Player.get(uuid);
 		});
 	}
@@ -98,7 +98,7 @@ public class OfflinePlayer implements ContextSerialization.Writable, Player {
 
 	@Override
 	public ICompoundTag to() {
-		return NBTagUtil.to(this.getId());
+		return (ICompoundTag) NbtHelper.fromUuid(this.getId());
 	}
 
 	@Override

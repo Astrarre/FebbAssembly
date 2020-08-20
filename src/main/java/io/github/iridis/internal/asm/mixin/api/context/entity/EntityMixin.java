@@ -1,7 +1,7 @@
 package io.github.iridis.internal.asm.mixin.api.context.entity;
 
 import io.github.iridis.api.context.ContextManager;
-import io.github.iridis.api.context.ContextSerialization;
+import io.github.iridis.internal.api.data.Serialization;
 import io.github.iridis.internal.asm.access.ContextHolderAccess;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,13 +39,13 @@ public abstract class EntityMixin implements ContextHolderAccess {
 
 	@Inject (method = "toTag", at = @At ("HEAD"))
 	private void toTag(CompoundTag tag, CallbackInfoReturnable<CompoundTag> cir) {
-		tag.put("irids:creationContext", ContextSerialization.serialize(this.creationContext));
+		tag.put("irids:creationContext", Serialization.serialize(this.creationContext));
 	}
 
 	@Inject (method = "fromTag", at = @At ("HEAD"))
 	private void fromTag(CompoundTag tag, CallbackInfo ci) {
 		ListTag tags = tag.getList("irids:creationContext", NbtType.COMPOUND);
-		this.creationContext = ContextSerialization.deserialize(tags);
+		this.creationContext = Serialization.deserialize(tags);
 	}
 
 	@Override

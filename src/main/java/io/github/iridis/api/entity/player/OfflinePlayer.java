@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import com.mojang.authlib.GameProfile;
 import io.github.iridis.api.context.ContextManager;
-import io.github.iridis.api.context.ContextSerialization;
+import io.github.iridis.api.data.Data;
 import io.github.iridis.api.entity.Player;
 import io.github.iridis.api.util.TriId;
 import io.github.iridis.internal.asm.mixin.access.PlayerManagerAccess;
@@ -23,11 +23,11 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.network.ServerPlayerEntity;
 
-public class OfflinePlayer implements ContextSerialization.Writable, Player {
+public class OfflinePlayer implements Data.Writable, Player {
 	private static final Id OFFLINE_PLAYER_ID = new Id("iridis", "offline_player");
 
 	static {
-		ContextSerialization.register(OFFLINE_PLAYER_ID, (c, t) -> {
+		Data.register(OFFLINE_PLAYER_ID, (c, t) -> {
 			UUID uuid = NbtHelper.toUuid((Tag) t);
 			return Player.get(uuid);
 		});

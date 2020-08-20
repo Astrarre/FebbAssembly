@@ -2,6 +2,7 @@ package io.github.iridis.api.context;
 
 import java.util.Objects;
 
+import io.github.iridis.api.data.Data;
 import net.devtech.nanoevents.util.Id;
 import v1_16_1.net.minecraft.nbt.ICompoundTag;
 
@@ -15,25 +16,25 @@ public class ContextKey<T> {
 	}
 
 	public static <T> ContextKey<T> of(String key, T object) {
-		if(object instanceof ContextSerialization.Writable) {
+		if(object instanceof Data.Writable) {
 			return new SerializableKey<>(key, object);
 		}
 		return object == null ? null : new ContextKey<>(key, object);
 	}
 
-	private static final class SerializableKey<T> extends ContextKey<T> implements ContextSerialization.Writable {
+	private static final class SerializableKey<T> extends ContextKey<T> implements Data.Writable {
 		private SerializableKey(String key, T object) {
 			super(key, object);
 		}
 
 		@Override
 		public ICompoundTag to() {
-			return ((ContextSerialization.Writable) this.object).to();
+			return ((Data.Writable) this.object).to();
 		}
 
 		@Override
 		public Id id() {
-			return ((ContextSerialization.Writable) this.object).id();
+			return ((Data.Writable) this.object).id();
 		}
 	}
 

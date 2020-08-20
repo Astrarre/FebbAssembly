@@ -1,6 +1,6 @@
 package io.github.iridis.internal.asm.mixin.api.context.blockentity;
 
-import io.github.iridis.api.context.ContextSerialization;
+import io.github.iridis.internal.api.data.Serialization;
 import io.github.iridis.internal.asm.access.ContextHolderAccess;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,12 +32,12 @@ public class BlockEntityMixin implements ContextHolderAccess {
 
 	@Inject (method = "toTag", at = @At ("HEAD"))
 	private void toTag(CompoundTag tag, CallbackInfoReturnable<CompoundTag> cir) {
-		tag.put("irids:context_", ContextSerialization.serialize(this.placementContext));
+		tag.put("irids:context_", Serialization.serialize(this.placementContext));
 	}
 
 	@Inject (method = "fromTag", at = @At ("HEAD"))
 	private void fromTag(BlockState state, CompoundTag tag, CallbackInfo ci) {
 		ListTag tags = tag.getList("irids:context_", NbtType.COMPOUND);
-		this.placementContext = ContextSerialization.deserialize(tags);
+		this.placementContext = Serialization.deserialize(tags);
 	}
 }

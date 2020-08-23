@@ -11,7 +11,6 @@ import io.github.iridis.internal.events.annotations.SingleMixin;
 import net.devtech.nanoevents.api.Logic;
 import net.devtech.nanoevents.api.annotations.Invoker;
 import v1_16_1.net.minecraft.block.IBlockState;
-import v1_16_1.net.minecraft.block.entity.IBlastFurnaceBlockEntity;
 import v1_16_1.net.minecraft.block.entity.IBlockEntity;
 import v1_16_1.net.minecraft.entity.player.IPlayerEntity;
 import v1_16_1.net.minecraft.item.IItemPlacementContext;

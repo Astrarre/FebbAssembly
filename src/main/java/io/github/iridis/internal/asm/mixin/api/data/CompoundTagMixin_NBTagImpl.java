@@ -20,7 +20,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagReader;
 
 @Mixin (CompoundTag.class)
-public abstract class CompoundTagMixin_NBTag implements NBTag {
+public abstract class CompoundTagMixin_NBTagImpl implements NBTag {
 	@Shadow
 	public abstract @Nullable Tag get(String key);
 

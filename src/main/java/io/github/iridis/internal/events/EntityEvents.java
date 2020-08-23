@@ -31,7 +31,7 @@ public class EntityEvents {
 	/**
 	 * post event for
 	 *
-	 * @see #preLivingEnitityLandEvent(ILivingEntity, float, MutableFloat)
+	 * @see #preLivingEnitityLandEvent(ILivingEntity, double, boolean, IBlockState, IBlockPos)
 	 */
 	@Invoker (value = "iridis:post_entity_fall_event", args = SingleMixin.class)
 	@SingleMixin (LivingEntityMixin_PreLivingEntityLandEvent.class)

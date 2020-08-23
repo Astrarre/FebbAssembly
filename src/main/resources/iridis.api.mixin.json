@@ -17,7 +17,7 @@
     "context.server.MinecraftServerMixin",
     "context.syncedBlockEvents.BlockEventMixin",
     "context.syncedBlockEvents.ServerWorldMixin",
-    "data.CompoundTagMixin_NBTag"
+    "data.CompoundTagMixin_NBTagImpl"
   ],
   "injectors": {
     "defaultRequire": 1

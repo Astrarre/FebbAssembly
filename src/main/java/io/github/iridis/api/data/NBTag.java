@@ -25,6 +25,10 @@ import net.fabricmc.fabric.api.util.NbtType;
  * @implNote create a wrapper class for CompoundTag when a key name changes
  */
 public interface NBTag {
+	static ICompoundTag copy(ICompoundTag tag) {
+		return tag == null ? null : tag.copy();
+	}
+
 	/**
 	 * deserializes an nbt tag from a stream of bytes
 	 */

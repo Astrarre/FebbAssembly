@@ -3,6 +3,7 @@
   "package": "io.github.iridis.internal.asm.mixin.api",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "block.CropBlockMixin_MoistBlock",
     "context.TntEntityMixin_Test",
     "context.blockentity.BlockEntityMixin",
     "context.blockentity.WorldMixin",
@@ -17,7 +18,9 @@
     "context.server.MinecraftServerMixin",
     "context.syncedBlockEvents.BlockEventMixin",
     "context.syncedBlockEvents.ServerWorldMixin",
-    "data.CompoundTagMixin_NBTagImpl"
+    "data.CompoundTagMixin_NBTagImpl",
+    "screen.AnvilScreenHandlerMixin_AttachImpl",
+    "screen.ForgingScreenHandlerMixin_AttachImpl"
   ],
   "injectors": {
     "defaultRequire": 1

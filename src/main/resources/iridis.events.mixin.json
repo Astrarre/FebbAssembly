@@ -4,6 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "plugin": "net.devtech.nanoevents.plugin.NanoEventMixinPlugin",
   "mixins": [
+    "block.AnvilScreenHandlerMixin_PostAnvilRecipeEvent",
+    "block.AnvilScreenHandlerMixin_PreAnvilRecipeEvent",
     "block.BlockItemMixin_PostBlockPlaceEvent",
     "block.BlockItemMixin_PreBlockPlaceEvent",
     "block.FireBlockMixin_PostBlockBurnedEvent",
@@ -13,6 +15,7 @@
     "block.WorldMixin_PostSetBlockEvent",
     "block.WorldMixin_PreSetBlockEvent",
     "entity.LivingEntityMixin_PreLivingEntityLandEvent",
+    "entity.MobEntityMixin_MobEquipEvent",
     "lifecycle.MinecraftServerMixin_ServerStartEvent",
     "lifecycle.MinecraftServerMixin_ServerStopEvent",
     "lifecycle.MinecraftServerMixin_ServerTickEvent",

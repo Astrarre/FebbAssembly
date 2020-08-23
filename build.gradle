@@ -59,7 +59,8 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation "net.fabricmc.fabric-api:fabric-api:$fabric_version"
     // api
-    compileOnly(files("dev/test-api.jar"))
+    compileOnly(files("$project.buildDir/febbAssembly/$project.minecraft_version/abstracted/api.jar"))
+
     // nanoevents (includes fasm)
     modImplementation "net.devtech:NanoEvents:$nano_events_ver"
 

@@ -1,5 +1,6 @@
 package io.github.iridis.internal.events;
 
+import io.github.iridis.internal.asm.mixin.events.block.AnvilScreenHandlerMixin_PreAnvilRecipeEvent;
 import io.github.iridis.internal.asm.mixin.events.block.BlockItemMixin_PostBlockPlaceEvent;
 import io.github.iridis.internal.asm.mixin.events.block.BlockItemMixin_PreBlockPlaceEvent;
 import io.github.iridis.internal.asm.mixin.events.block.FireBlockMixin_PostBlockBurnedEvent;
@@ -10,15 +11,33 @@ import io.github.iridis.internal.asm.mixin.events.block.WorldMixin_PreSetBlockEv
 import io.github.iridis.internal.events.annotations.SingleMixin;
 import net.devtech.nanoevents.api.Logic;
 import net.devtech.nanoevents.api.annotations.Invoker;
+import v1_16_1.net.minecraft.block.IAbstractBlock;
+import v1_16_1.net.minecraft.block.IBlock;
 import v1_16_1.net.minecraft.block.IBlockState;
 import v1_16_1.net.minecraft.block.entity.IBlockEntity;
 import v1_16_1.net.minecraft.entity.player.IPlayerEntity;
 import v1_16_1.net.minecraft.item.IItemPlacementContext;
+import v1_16_1.net.minecraft.screen.IAnvilScreenHandler;
 import v1_16_1.net.minecraft.util.math.IBlockPos;
 import v1_16_1.net.minecraft.world.IWorld;
 
 @SuppressWarnings ("ReferenceToMixin")
 public class BlockEvents {
+	/**
+	 * great for custom anvil recipes. you must cancel the event if you edit the recipe
+	 * @return true if the event should be cancelled
+	 */
+	@Invoker (value = "iridis:pre_anvil_recipe", args = SingleMixin.class)
+	@SingleMixin(AnvilScreenHandlerMixin_PreAnvilRecipeEvent.class)
+	public static boolean preAnvilRecipe(IAnvilScreenHandler handler) {
+		Logic.start();
+		if (preAnvilRecipe(handler)) {
+			return true;
+		}
+		Logic.start();
+		return false;
+	}
+
 	/**
 	 * @return true if the event should be cancelled
 	 */

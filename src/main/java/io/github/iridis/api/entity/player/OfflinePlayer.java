@@ -19,6 +19,7 @@ import v1_16_1.net.minecraft.server.IMinecraftServer;
 import v1_16_1.net.minecraft.server.IPlayerManager;
 import v1_16_1.net.minecraft.server.network.IServerPlayerEntity;
 
+import net.minecraft.inventory.Inventory;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -28,7 +29,7 @@ public class OfflinePlayer implements Data.Writable, Player {
 
 	static {
 		Data.register(OFFLINE_PLAYER_ID, (c, t) -> {
-			UUID uuid = NbtHelper.toUuid((Tag) t);
+			UUID uuid = NbtHelper.toUuid((Tag) (Object) t);
 			return Player.get(uuid);
 		});
 	}

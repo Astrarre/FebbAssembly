@@ -19,6 +19,10 @@
     "context.syncedBlockEvents.BlockEventMixin",
     "context.syncedBlockEvents.ServerWorldMixin",
     "data.CompoundTagMixin_NBTagImpl",
+    "item.AbstractFurnaceBlockEntityMixin_BurnTimeRegistry",
+    "item.Item$SettingsMixin_AttachImpl",
+    "item.ItemMixin_RegisterBurnTime",
+    "item.ItemSettingsMixin_AttachImpl",
     "screen.AnvilScreenHandlerMixin_AttachImpl",
     "screen.ForgingScreenHandlerMixin_AttachImpl"
   ],

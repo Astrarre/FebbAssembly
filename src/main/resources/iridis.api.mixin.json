@@ -4,7 +4,6 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "block.CropBlockMixin_MoistBlock",
-    "context.TntEntityMixin_Test",
     "context.blockentity.BlockEntityMixin",
     "context.blockentity.WorldMixin",
     "context.entity.EntityMixin",
@@ -20,7 +19,6 @@
     "context.syncedBlockEvents.ServerWorldMixin",
     "data.CompoundTagMixin_NBTagImpl",
     "item.AbstractFurnaceBlockEntityMixin_BurnTimeRegistry",
-    "item.Item$SettingsMixin_AttachImpl",
     "item.ItemMixin_RegisterBurnTime",
     "item.ItemSettingsMixin_AttachImpl",
     "screen.AnvilScreenHandlerMixin_AttachImpl",

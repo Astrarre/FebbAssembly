@@ -4,7 +4,6 @@
   "compatibilityLevel": "JAVA_8",
   "plugin": "net.devtech.nanoevents.plugin.NanoEventMixinPlugin",
   "mixins": [
-    "block.AnvilScreenHandlerMixin_PostAnvilRecipeEvent",
     "block.AnvilScreenHandlerMixin_PreAnvilRecipeEvent",
     "block.BlockItemMixin_PostBlockPlaceEvent",
     "block.BlockItemMixin_PreBlockPlaceEvent",

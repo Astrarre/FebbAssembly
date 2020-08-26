@@ -1,8 +1,10 @@
-import abstractor.ClassAbstractionType
-import abstractor.MemberAbstractionType
-import abstractor.TargetSelector
+import metautils.api.AbstractionType
+import metautils.api.ClassAbstractionType
 import metautils.api.ClassApi
+import metautils.api.TargetSelector
 import metautils.util.applyIf
+import metautils.util.toDollarString
+import metautils.util.toSlashString
 
 
 data class AbstractionSelections(val interfaces: AbstractionSelection, val baseclasses: AbstractionSelection) {
@@ -11,16 +13,16 @@ data class AbstractionSelections(val interfaces: AbstractionSelection, val basec
         val compiledBaseclasses = baseclasses.compile()
 
         fun String.selectedAbstractionType(
-            classApi: ClassApi, memberSelectionsProperty: (CompiledAbstractedClass) -> List<Regex>?
-        ): MemberAbstractionType {
+                classApi: ClassApi, memberSelectionsProperty: (CompiledAbstractedClass) -> List<Regex>?
+        ): AbstractionType {
             val selectedForBaseclass = isSelected(classApi, compiledBaseclasses, memberSelectionsProperty)
             val selectedForInterface = isSelected(classApi, compiledInterfaces, memberSelectionsProperty)
 
             return when {
-                selectedForBaseclass && selectedForInterface -> MemberAbstractionType.BaseclassAndInterface
-                selectedForBaseclass -> MemberAbstractionType.Baseclass
-                selectedForInterface -> MemberAbstractionType.Interface
-                else -> MemberAbstractionType.None
+                selectedForBaseclass && selectedForInterface -> AbstractionType.BaseclassAndInterface
+                selectedForBaseclass -> AbstractionType.Baseclass
+                selectedForInterface -> AbstractionType.Interface
+                else -> AbstractionType.None
             }
         }
 
@@ -42,8 +44,8 @@ data class AbstractionSelections(val interfaces: AbstractionSelection, val basec
     }
 
     private fun ClassApi.getSelection(selections: CompiledAbstractionSelection): CompiledAbstractedClass? {
-        val packageRegexes = selections[name.packageName!!.toSlashQualified()] ?: return null
-        return packageRegexes.find { (regex, _) -> regex.matches(name.shortName.toDollarQualifiedString()) }?.second
+        val packageRegexes = selections[name.packageName.toSlashString()] ?: return null
+        return packageRegexes.find { (regex, _) -> regex.matches(name.shortName.toDollarString()) }?.second
     }
 
     private fun ClassApi.isSelected(selections: CompiledAbstractionSelection) = getSelection(selections) != null

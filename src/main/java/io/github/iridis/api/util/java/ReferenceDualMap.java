@@ -9,7 +9,7 @@ import java.util.WeakHashMap;
 import java.util.logging.Logger;
 
 import com.google.common.collect.Sets;
-import jdk.nashorn.internal.codegen.types.Type;
+//import jdk.nashorn.internal.codegen.types.Type;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +28,7 @@ public class ReferenceDualMap<K, V> extends HashMap<K, V> implements Map<K, V> {
 		Logger logger = Logger.getLogger(ReferenceDualMap.class.getSimpleName());
 		logger.warning("--- Attention Furnace Tinkering Dev ---");
 		logger.warning("ReferenceDual map is in use, a map may appear to mutate when no operations are done by it");
-		logger.warning("https://github.com/IridisMC/FebbAssembly/tree/master/src/main/java/" + Type.getInternalName(ReferenceDualMap.class) + ".java");
+//		logger.warning("https://github.com/IridisMC/FebbAssembly/tree/master/src/main/java/" + Type.getInternalName(ReferenceDualMap.class) + ".java");
 		logger.warning(
 				"Iridis uses this to 'replace' the AbstractFurnaceBlockEntity#createFuelTimeMap map for compatibility. But it has the potential to open " +
 				"create bugs");

@@ -3,9 +3,10 @@ import java.nio.file.Path
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-class TaskDelegate(private val context: ProjectContext, private val configure: Task.() -> Unit) : ReadOnlyProperty<Any?, Task> {
+class TaskDelegate(private val context: ProjectContext, private val configure: Task.() -> Unit) {
     private lateinit var task: Task
-    override operator fun getValue(thisRef: Any?, property: KProperty<*>): Task {
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: Task) {}
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): Task {
         if (::task.isInitialized) return task
         else {
             task = context.project.task(property.name) { configure(it) }
@@ -13,6 +14,7 @@ class TaskDelegate(private val context: ProjectContext, private val configure: T
         }
     }
 }
+//TODO: try getting rid of properties or smthn like that mb
 
 /** you MUST access the delegate at least once */
 fun ProjectContext.task(vararg dependencies: Task, configure: Task.() -> Unit): TaskDelegate {

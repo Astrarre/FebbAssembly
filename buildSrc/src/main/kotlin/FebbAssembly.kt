@@ -1,7 +1,6 @@
 import abstractor.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
-import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.*
+import kotlinx.serialization.stringify
 import metautils.testing.getResource
 import metautils.testing.verifyClassFiles
 import metautils.util.*
@@ -14,6 +13,7 @@ import org.apache.commons.io.FileUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.jvm.tasks.Jar
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
@@ -28,7 +28,7 @@ class FebbAssembly : Plugin<Project> {
     override fun apply(project: Project) {
         ProjectContext(project).apply {
             artifacts = this
-            apply()
+//            apply()
         }
     }
 }
@@ -98,265 +98,272 @@ class ProjectContext(val project: Project) {
                 minecraftVersionManifest.writeString(versionManifest.toString())
             }
         }
-        val downloadMinecraft by task(downloadVersionManifest) {
-            setFileInputs(minecraftVersionManifest)
-            setFileOutputs(clientPath, serverPath)
-            doLast {
-                downloadMinecraft(readVersionManifest())
-            }
-        }
-        val downloadMcLibraries by task(downloadVersionManifest) {
-            setFileInputs(minecraftVersionManifest)
-            setDirOutputs(libsDir)
-            doLast {
-                downloadMcLibraries(readVersionManifest())
-            }
-        }
-        val mergeMcJars by task(downloadMinecraft) {
-            setFileInputs(clientPath, serverPath)
-            setFileOutputs(mergedPath)
-            doLast {
-                mergeMinecraftJars()
-            }
-        }
-        val downloadMappings by task {
-            setPropertyInputs("mcVersion" to mcVersion, "mappings" to mappingsBuild)
-            setDirOutputs(mappingsDir)
-            doLast {
-                downloadMappings()
-            }
-        }
-        val remapMcJar by task(mergeMcJars, downloadMappings, downloadMcLibraries) {
-            setFileInputs(mergedPath, mappingsPath)
-            setDirInputs(libsDir)
-            setFileOutputs(remappedMcPath)
-            doLast {
-                remapMinecraftJar(classpath, mappings)
-            }
-        }
-        val abstract by task(remapMcJar, project.tasks.getByName("processResources")) {
-            setPropertyInputs("apiBuild" to apiBuild)
-            setFileInputs(mergedPath, mappingsPath)
-            setDirInputs(libsDir,configDir)
-            setDirOutputs(abstractedDir)
-
-            doLast {
-                abstractMinecraft(classpath, mappings)
-            }
-        }
-        val setupDev by task(abstract) {
-            setDirInputs(abstractedDir)
-            setDirOutputs(currentVersionAbstractedDirInClasses)
-            setFileOutputs(apiForDevTesting)
-            doLast {
-                copyImplToClassesDir()
-                copyApiForTestingInDev()
-            }
-        }
-
-        val verifyAbstractedJar by task(setupDev, project.tasks.getByName("classes")) {
-            setDirInputs(implNamedDir, libsDir, classesOutputDir)
-            setFileInputs(remappedMcPath)
-            doLast {
-                verifyAbstractedJar()
-            }
-        }
-
-
-        project.tasks.getByName("build").dependsOn(verifyAbstractedJar)
-
-        // We need the classfiles of FebbAssembly to verify the abstracted impl jar, since we use interfaces
-        // from there.
-        // Make sure Abstract runs before we publish
-        project.tasks.getByName("prepareKotlinBuildScriptModel").dependsOn(setupDev)
-        project.tasks.getByName("classes").dependsOn(setupDev)
+//        val downloadMinecraft by task(downloadVersionManifest) {
+//            setFileInputs(minecraftVersionManifest)
+//            setFileOutputs(clientPath, serverPath)
+//            doLast {
+//                downloadMinecraft(readVersionManifest())
+//            }
+//        }
+//        val downloadMcLibraries by task(downloadVersionManifest) {
+//            setFileInputs(minecraftVersionManifest)
+//            setDirOutputs(libsDir)
+//            doLast {
+//                downloadMcLibraries(readVersionManifest())
+//            }
+//        }
+//        val mergeMcJars by task(downloadMinecraft) {
+//            setFileInputs(clientPath, serverPath)
+//            setFileOutputs(mergedPath)
+//            doLast {
+//                mergeMinecraftJars()
+//            }
+//        }
+//        val downloadMappings by task {
+//            setPropertyInputs("mcVersion" to mcVersion, "mappings" to mappingsBuild)
+//            setDirOutputs(mappingsDir)
+//            doLast {
+//                downloadMappings()
+//            }
+//        }
+//        val remapMcJar by task(mergeMcJars, downloadMappings, downloadMcLibraries) {
+//            setFileInputs(mergedPath, mappingsPath)
+//            setDirInputs(libsDir)
+//            setFileOutputs(remappedMcPath)
+//            doLast {
+//                remapMinecraftJar(classpath, mappings)
+//            }
+//        }
+//        val abstract by task(remapMcJar, project.tasks.getByName("processResources")) {
+//            setPropertyInputs("apiBuild" to apiBuild)
+//            setFileInputs(mergedPath, mappingsPath)
+//            setDirInputs(libsDir,configDir)
+//            setDirOutputs(abstractedDir)
+//
+//            doLast {
+//                abstractMinecraft(classpath, mappings)
+//            }
+//        }
+//        val setupDev by task(abstract) {
+//            setDirInputs(abstractedDir)
+//            setDirOutputs(currentVersionAbstractedDirInClasses)
+//            setFileOutputs(apiForDevTesting)
+//            doLast {
+//                copyImplToClassesDir()
+//                copyApiForTestingInDev()
+//            }
+//        }
+//
+//        val verifyAbstractedJar by task(setupDev, project.tasks.getByName("classes")) {
+//            setDirInputs(implNamedDir, libsDir, classesOutputDir)
+//            setFileInputs(remappedMcPath)
+//            doLast {
+//                verifyAbstractedJar()
+//            }
+//        }
+//
+//
+//        project.tasks.getByName("build").dependsOn(verifyAbstractedJar)
+////        project.tasks.withType(Jar::class.java) {jarTask ->
+////            jarTask.doLast {
+////                jarTask.archiveFile.get().asFile.toPath().openJar { jar ->
+////                    jar.getPath("IsIridisInternalDev.txt").writeString("false")
+////                }
+////            }
+////        }
+//
+//        // We need the classfiles of FebbAssembly to verify the abstracted impl jar, since we use interfaces
+//        // from there.
+//        // Make sure Abstract runs before we publish
+//        project.tasks.getByName("prepareKotlinBuildScriptModel").dependsOn(setupDev)
+//        project.tasks.getByName("classes").dependsOn(setupDev)
     }
 
-    private fun verifyAbstractedJar() {
-        println("Verifying abstracted jar...")
-        verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath, classesOutputDir))
-    }
-
-    private fun readVersionManifest(): JsonObject =
-            Json(JsonConfiguration.Stable).parseJson(minecraftVersionManifest.readToString()).jsonObject
-
-    private fun copyApiForTestingInDev() {
-        apiForDevTesting.createParentDirectories()
-        apiBinariesJar.copyTo(apiForDevTesting)
-    }
-
-    // This is so the published artifact will have the abstracted stuff, in addition to the real java code
-    // we have in FebbAssembly
-    private fun copyImplToClassesDir() {
-        FileUtils.copyDirectory(implNamedDir.toFile(), implNamedDest.toFile())
-    }
-
-
-    private fun downloadMinecraft(versionManifest: JsonObject) {
-        val downloads = versionManifest.getObject("downloads")
-        val client = downloads.getObject("client").getPrimitive("url").content
-        val server = downloads.getObject("server").getPrimitive("url").content
-        minecraftDir.createDirectories()
-        downloadIfChanged(client, clientPath)
-        downloadIfChanged(server, serverPath)
-    }
-
-    private fun downloadMcLibraries(versionManifest: JsonObject) {
-        for (library in Minecraft.getLibraryUrls(versionManifest)) {
-            val path = libsDir.resolve(library.filePath)
-            path.createParentDirectories()
-            downloadIfChanged(library.url, path)
-        }
-    }
-
-    private fun mergeMinecraftJars() {
-        JarMerger(clientPath.toFile(), serverPath.toFile(), mergedPath.toFile()).use { jarMerger ->
-            jarMerger.enableSyntheticParamsOffset()
-            jarMerger.merge()
-        }
-    }
-
-    private fun downloadMappings() {
-        mappingsDir.createDirectories()
-        downloadIfChanged(Fabric.getMergedMappingsUrl(mcVersion, mappingsBuild), mappingsJar)
-        mappingsJar.openJar {
-            it.getPath("mappings/mappings.tiny").copyTo(mappingsPath)
-        }
-    }
-
-    private fun remapMinecraftJar(classpath: List<Path>, mappings: TinyTree) {
-        remap(
-                mappings,
-                classpath,
-                fromNamespace = "official",
-                toNamespace = "named",
-                fromPath = mergedPath,
-                toPath = remappedMcPath
-        )
-    }
-
-    private fun remap(
-            mappings: TinyTree,
-            classpath: List<Path>,
-            fromNamespace: String,
-            toNamespace: String,
-            fromPath: Path,
-            toPath: Path
-    ) {
-        val remapper = TinyRemapper.newRemapper()
-                .withMappings(TinyRemapperMappingsHelper.create(mappings, fromNamespace, toNamespace, true))
-                .renameInvalidLocals(true)
-                .rebuildSourceFilenames(true)
-                .build()
-
-        OutputConsumerPath.Builder(toPath).build().use { outputConsumer ->
-            outputConsumer.addNonClassFiles(fromPath)
-            remapper.readClassPath(*classpath.toTypedArray())
-            remapper.readInputs(fromPath)
-            remapper.apply(outputConsumer)
-        }
-    }
-
-    private fun abstractMinecraft(
-            classpath: List<Path>,
-            mappings: TinyTree
-    ) {
-        assert(remappedMcPath.exists())
-        val metadata = createAbstractionMetadata(classpath)
-        val manifest = runAbstractor(metadata)
-        saveManifest(manifest, mappings)
-    }
-
-    private fun createAbstractionMetadata(classpath: List<Path>): AbstractionMetadata {
-//          interfaces, baseclasses, iinterfacesPath, baseinterfacesPath ->
-        val interfaceSelection = AbstractionSelection.fromHocon(interfaceAbstractions.readToString())
-        val baseclassSelection = AbstractionSelection.fromHocon(baseclassAbstractions.readToString())
-        val imap = HashMap<String, Collection<String>>()
-        val iinterfaceProperties = Properties()
-        iinterfaceProperties.load(addedInterfaces.inputStream())
-        iinterfaceProperties.forEach { a, b ->
-            imap[a.toString()] = b.toString().split(",")
-        }
-
-        val baseMap = HashMap<String, Collection<String>>()
-        val interfaceBaseProperties = Properties()
-        interfaceBaseProperties.load(addedBaseclasses.inputStream())
-        interfaceBaseProperties.forEach { a, b ->
-            baseMap[a.toString()] = b.toString().split(",")
-        }
-
-        return AbstractionMetadata(
-                versionPackage = VersionPackage.fromMcVersion(mcVersion),
-                writeRawAsm = true,
-                fitToPublicApi = false,
-                classPath = classpath,
-                javadocs = JavaDocs.readTiny(mappingsPath),
-                selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector(),
-                iinterfaces = imap,
-                interfacesbase = baseMap
-        )
-    }
-
-    private fun runAbstractor(
-            metadata: AbstractionMetadata
-    ): AbstractionManifest {
-        abstractedDirectOutputDir.createDirectories()
-        val manifest = Abstractor.parse(mcJar = remappedMcPath, metadata = metadata) {
-            it.abstract(implNamedDir, metadata)
-            val apiMetadata = metadata.copy(fitToPublicApi = true)
-            it.abstract(apiBinariesDir, apiMetadata)
-            it.abstract(apiSourcesDir, apiMetadata.copy(writeRawAsm = false))
-        }
-
-        deleteOldAbstractedClassesInClassesDir()
-//        implNamedDir.convertDirToJar(implNamedJar)
-        apiBinariesDir.convertDirToJar(apiBinariesJar)
-        apiSourcesDir.convertDirToJar(apiSourcesJar)
-        return manifest
-    }
-
-    private fun deleteOldAbstractedClassesInClassesDir() {
-        if (classesOutputDir.exists()) {
-            classesOutputDir.directChildren().forEach {
-                // we assume only api classes start with "v". If we accidently name something with a root package
-                // of "vaccum" it will be a very sad day.
-                if (it.toString().startsWith("v")) {
-                    it.deleteRecursively()
-                }
-            }
-        }
-    }
-
-
-    private fun saveManifest(manifest: AbstractionManifest, mappings: TinyTree) {
-        abstractionManifestJson.writeString(
-                Json(JsonConfiguration.Stable).stringify(AbstractionManifestSerializer, manifest)
-        )
-
-        abstractionManifestJson.storeInJar(abstractionManifestJar)
-
-        val namedToInt = mappings.mapNamedClassesToIntermediary()
-
-        val intDotQualifiedToApi = manifest.map { (mcClassName, apiClassInfo) ->
-            namedToInt.getValue(mcClassName).replace("/", ".") to apiClassInfo.apiClassName
-        }
-
-        Properties().apply {
-            putAll(intDotQualifiedToApi)
-            Files.newOutputStream(runtimeManifestProperties).use { store(it, null) }
-        }
-
-//        runtimeManifestProperties.storeInJar(runtimeManifestJar)
-
-    }
-
-    private fun Path.storeInJar(jarPath: Path) {
-        jarPath.deleteIfExists()
-        jarPath.createJar()
-        jarPath.openJar {
-            copyTo(it.getPath("/$fileName"))
-        }
-    }
+//    private fun verifyAbstractedJar() {
+//        println("Verifying abstracted jar...")
+//        verifyClassFiles(implNamedDir, classpath + listOf(remappedMcPath, classesOutputDir))
+//    }
+//
+//    private fun readVersionManifest(): JsonObject =
+//            Json.parseToJsonElement(minecraftVersionManifest.readToString()).jsonObject
+//
+//    private fun copyApiForTestingInDev() {
+//        apiForDevTesting.createParentDirectories()
+//        apiBinariesJar.copyTo(apiForDevTesting)
+//    }
+//
+//    // This is so the published artifact will have the abstracted stuff, in addition to the real java code
+//    // we have in FebbAssembly
+//    private fun copyImplToClassesDir() {
+//        FileUtils.copyDirectory(implNamedDir.toFile(), implNamedDest.toFile())
+//    }
+//
+//
+//    private fun downloadMinecraft(versionManifest: JsonObject) {
+//        val downloads = versionManifest.getValue("downloads").jsonObject
+//        val client = downloads.getValue("client").jsonObject.getValue("url").jsonPrimitive.content
+//        val server = downloads.getValue("server").jsonObject.getValue("url").jsonPrimitive.content
+//        minecraftDir.createDirectories()
+//        downloadIfChanged(client, clientPath)
+//        downloadIfChanged(server, serverPath)
+//    }
+//
+//    private fun downloadMcLibraries(versionManifest: JsonObject) {
+//        for (library in Minecraft.getLibraryUrls(versionManifest)) {
+//            val path = libsDir.resolve(library.filePath)
+//            path.createParentDirectories()
+//            downloadIfChanged(library.url, path)
+//        }
+//    }
+//
+//    private fun mergeMinecraftJars() {
+//        JarMerger(clientPath.toFile(), serverPath.toFile(), mergedPath.toFile()).use { jarMerger ->
+//            jarMerger.enableSyntheticParamsOffset()
+//            jarMerger.merge()
+//        }
+//    }
+//
+//    private fun downloadMappings() {
+//        mappingsDir.createDirectories()
+//        downloadIfChanged(Fabric.getMergedMappingsUrl(mcVersion, mappingsBuild), mappingsJar)
+//        mappingsJar.openJar {
+//            it.getPath("mappings/mappings.tiny").copyTo(mappingsPath)
+//        }
+//    }
+//
+//    private fun remapMinecraftJar(classpath: List<Path>, mappings: TinyTree) {
+//        remap(
+//                mappings,
+//                classpath,
+//                fromNamespace = "official",
+//                toNamespace = "named",
+//                fromPath = mergedPath,
+//                toPath = remappedMcPath
+//        )
+//    }
+//
+//    private fun remap(
+//            mappings: TinyTree,
+//            classpath: List<Path>,
+//            fromNamespace: String,
+//            toNamespace: String,
+//            fromPath: Path,
+//            toPath: Path
+//    ) {
+//        val remapper = TinyRemapper.newRemapper()
+//                .withMappings(TinyRemapperMappingsHelper.create(mappings, fromNamespace, toNamespace, true))
+//                .renameInvalidLocals(true)
+//                .rebuildSourceFilenames(true)
+//                .build()
+//
+//        OutputConsumerPath.Builder(toPath).build().use { outputConsumer ->
+//            outputConsumer.addNonClassFiles(fromPath)
+//            remapper.readClassPath(*classpath.toTypedArray())
+//            remapper.readInputs(fromPath)
+//            remapper.apply(outputConsumer)
+//        }
+//    }
+//
+//    private fun abstractMinecraft(
+//            classpath: List<Path>,
+//            mappings: TinyTree
+//    ) {
+//        assert(remappedMcPath.exists())
+//        val metadata = createAbstractionMetadata(classpath)
+//        val manifest = runAbstractor(metadata)
+//        saveManifest(manifest, mappings)
+//    }
+//
+//    private fun createAbstractionMetadata(classpath: List<Path>): AbstractionMetadata {
+////          interfaces, baseclasses, iinterfacesPath, baseinterfacesPath ->
+//        val interfaceSelection = AbstractionSelection.fromHocon(interfaceAbstractions.readToString())
+//        val baseclassSelection = AbstractionSelection.fromHocon(baseclassAbstractions.readToString())
+//        val imap = HashMap<String, Collection<String>>()
+//        val iinterfaceProperties = Properties()
+//        iinterfaceProperties.load(addedInterfaces.inputStream())
+//        iinterfaceProperties.forEach { a, b ->
+//            imap[a.toString()] = b.toString().split(",")
+//        }
+//
+//        val baseMap = HashMap<String, Collection<String>>()
+//        val interfaceBaseProperties = Properties()
+//        interfaceBaseProperties.load(addedBaseclasses.inputStream())
+//        interfaceBaseProperties.forEach { a, b ->
+//            baseMap[a.toString()] = b.toString().split(",")
+//        }
+//
+//        return AbstractionMetadata(
+//                versionPackage = VersionPackage.fromMcVersion(mcVersion),
+//                writeRawAsm = true,
+//                fitToPublicApi = false,
+//                classPath = classpath,
+//                javadocs = JavaDocs.readTiny(mappingsPath),
+//                selector = AbstractionSelections(interfaceSelection, baseclassSelection).toTargetSelector(),
+//                iinterfaces = imap,
+//                interfacesbase = baseMap
+//        )
+//    }
+//
+//    private fun runAbstractor(
+//            metadata: AbstractionMetadata
+//    ): AbstractionManifest {
+//        abstractedDirectOutputDir.createDirectories()
+//        val manifest = Abstractor.parse(mcJar = remappedMcPath, metadata = metadata) {
+//            it.abstract(implNamedDir, metadata)
+//            val apiMetadata = metadata.copy(fitToPublicApi = true)
+//            it.abstract(apiBinariesDir, apiMetadata)
+//            it.abstract(apiSourcesDir, apiMetadata.copy(writeRawAsm = false))
+//        }
+//
+//        deleteOldAbstractedClassesInClassesDir()
+////        implNamedDir.convertDirToJar(implNamedJar)
+//        apiBinariesDir.convertDirToJar(apiBinariesJar)
+//        apiSourcesDir.convertDirToJar(apiSourcesJar)
+//        return manifest
+//    }
+//
+//    private fun deleteOldAbstractedClassesInClassesDir() {
+//        if (classesOutputDir.exists()) {
+//            classesOutputDir.directChildren().forEach {
+//                // we assume only api classes start with "v". If we accidently name something with a root package
+//                // of "vaccum" it will be a very sad day.
+//                if (it.toString().startsWith("v")) {
+//                    it.deleteRecursively()
+//                }
+//            }
+//        }
+//    }
+//
+//
+//    private fun saveManifest(manifest: AbstractionManifest, mappings: TinyTree) {
+//        abstractionManifestJson.writeString(
+//                Json.encodeToString(AbstractionManifestSerializer, manifest)
+//        )
+//
+//        abstractionManifestJson.storeInJar(abstractionManifestJar)
+//
+//        val namedToInt = mappings.mapNamedClassesToIntermediary()
+//
+//        val intDotQualifiedToApi = manifest.map { (mcClassName, apiClassInfo) ->
+//            namedToInt.getValue(mcClassName).replace("/", ".") to apiClassInfo.apiClassName
+//        }
+//
+//        Properties().apply {
+//            putAll(intDotQualifiedToApi)
+//            Files.newOutputStream(runtimeManifestProperties).use { store(it, null) }
+//        }
+//
+////        runtimeManifestProperties.storeInJar(runtimeManifestJar)
+//
+//    }
+//
+//    private fun Path.storeInJar(jarPath: Path) {
+//        jarPath.deleteIfExists()
+//        jarPath.createJar()
+//        jarPath.openJar {
+//            copyTo(it.getPath("/$fileName"))
+//        }
+//    }
 
 }
 

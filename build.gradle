@@ -3,15 +3,22 @@ plugins {
     id("maven-publish")
     id("com.dorongold.task-tree") version "1.5"
     id "com.jfrog.bintray" version "1.8.5"
-    id "io.github.febb.febbgradle" version "1.1.3"
+//    id "io.github.febb.febbgradle" version "1.1.3"
 }
 
-febb {
-//    minecraftVersion = minecraft_version
-//    yarnBuild = mappings_build
+apply plugin: FebbAssembly
 
-    customAbstractionManifest = project.file("build/febbAssembly/1.16.1/abstracted/directOutput/abstractionManifest.json")
-}
+//febb {
+////    minecraftVersion = minecraft_version
+////    yarnBuild = mappings_build
+//    def manifest = project.file("build/febbAssembly/$minecraft_version/abstracted/directOutput/abstractionManifest.json")
+//    //TODO: not a very good solution, need a way to run abstraction before febbgradle does its stuff
+//    if(!manifest.exists()){
+//        manifest.parentFile.mkdirs()
+//        manifest.write("{}")
+//    }
+//    customAbstractionManifest = manifest
+//}
 
 test {
     workingDir = 'testRun'
@@ -40,7 +47,6 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-apply plugin: FebbAssembly
 
 def totalVersion = "$minecraft_version+$mappings_build-$api_build"
 

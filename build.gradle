@@ -3,15 +3,15 @@ plugins {
     id("maven-publish")
     id("com.dorongold.task-tree") version "1.5"
     id "com.jfrog.bintray" version "1.8.5"
-//    id "io.github.febb.febbgradle" version "1.1.3"
+    id "io.github.febb.febbgradle" version "1.1.3"
 }
 
-//febb {
-////    minecraftVersion = minecraft_version
-////    yarnBuild = mappings_build
-//
-//    customAbstractionManifest = project.file("build/febbAssembly/1.16.1/abstracted/directOutput/abstractionManifest.json")
-//}
+febb {
+//    minecraftVersion = minecraft_version
+//    yarnBuild = mappings_build
+
+    customAbstractionManifest = project.file("build/febbAssembly/1.16.1/abstracted/directOutput/abstractionManifest.json")
+}
 
 test {
     workingDir = 'testRun'

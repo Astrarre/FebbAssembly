@@ -1,6 +1,8 @@
 import com.typesafe.config.ConfigFactory
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.config.ConfigParser
+import kotlinx.serialization.hocon.Hocon
+
+//import kotlinx.serialization.config.ConfigParser
 
 /**
  * package/name {
@@ -18,10 +20,10 @@ import kotlinx.serialization.config.ConfigParser
 @Serializable
 data class AbstractionSelection(val value: Map<String, AbstractedPackage>) {
     companion object {
-        fun fromHocon(hoconStr: String) = ConfigParser.parse(
-            ConfigFactory.empty()
-                .withValue("value", ConfigFactory.parseString(hoconStr).root()), serializer()
-        )
+        fun fromHocon(hoconStr: String)  = Hocon.decodeFromConfig(
+                serializer(),
+                ConfigFactory.empty()
+                        .withValue("value", ConfigFactory.parseString(hoconStr).root()))
     }
 }
 

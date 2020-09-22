@@ -143,44 +143,44 @@ processResources {
 
 
 // configure the maven publication
-//publishing {
-//    publications {
-//        mavenJava(MavenPublication) {
-//
-//            groupId 'io.github.febb'
-//            artifactId "api"
-//            version totalVersion
-//
-//            def artifacts = FebbAssembly.Companion.artifacts
-//            artifact(remapJar) {
-//                builtBy remapJar
-//                classifier "impl-fabric"
-//            }
-//
-//            artifact(artifacts.apiBinariesJar) {
-//                classifier "api"
-//            }
-//
-//            artifact(artifacts.apiSourcesJar) {
-//                classifier "api-sources"
-//            }
-//
-//            artifact(artifacts.abstractionManifestJar) {
-//                artifact(artifacts.apiBinariesJar) {
-//                    classifier "api"
-//                }
-//
-//                artifact(artifacts.apiSourcesJar) {
-//                    classifier "api-sources"
-//                }
-//
-//                artifact(artifacts.abstractionManifestJar) {
-//                    classifier "dev-manifest"
-//                }
-//            }
-//        }
-//    }
-//}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+
+            groupId 'io.github.febb'
+            artifactId "api"
+            version totalVersion
+
+            def artifacts = FebbAssembly.Companion.artifacts
+            artifact(remapJar) {
+                builtBy remapJar
+                classifier "impl-fabric"
+            }
+
+            artifact(artifacts.apiBinariesJar) {
+                classifier "api"
+            }
+
+            artifact(artifacts.apiSourcesJar) {
+                classifier "api-sources"
+            }
+
+            artifact(artifacts.abstractionManifestJar) {
+                artifact(artifacts.apiBinariesJar) {
+                    classifier "api"
+                }
+
+                artifact(artifacts.apiSourcesJar) {
+                    classifier "api-sources"
+                }
+
+                artifact(artifacts.abstractionManifestJar) {
+                    classifier "dev-manifest"
+                }
+            }
+        }
+    }
+}
 
 
 bintray {

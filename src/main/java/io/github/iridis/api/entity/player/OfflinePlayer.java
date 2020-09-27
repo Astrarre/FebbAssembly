@@ -6,7 +6,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.mojang.authlib.GameProfile;
-import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
+import io.github.iridis.api.context.DefaultContext;
 import io.github.iridis.api.data.Data;
 import io.github.iridis.api.entity.Player;
 import io.github.iridis.api.util.TriId;
@@ -19,7 +20,6 @@ import v1_16_1.net.minecraft.server.IMinecraftServer;
 import v1_16_1.net.minecraft.server.IPlayerManager;
 import v1_16_1.net.minecraft.server.network.IServerPlayerEntity;
 
-import net.minecraft.inventory.Inventory;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -67,7 +67,7 @@ public class OfflinePlayer implements Data.Writable, Player {
 	 * modify the inventory and general data of the server player entity, and then save immediately if the player is offline
 	 */
 	public void modifyOffline(Consumer<IServerPlayerEntity> consumer) {
-		IMinecraftServer server = ContextManager.getInstance().peekFirstOfTypeOrThrow(IMinecraftServer.class);
+		IMinecraftServer server = DefaultContext.SERVER.get().peekFirstOfTypeOrThrow(IMinecraftServer.class);
 		IPlayerManager manager = server.getPlayerManager();
 		IServerPlayerEntity entity = manager.getPlayer(this.getId());
 		if(entity == null) {

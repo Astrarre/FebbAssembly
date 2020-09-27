@@ -47,6 +47,9 @@ public class IridisAsm implements Runnable {
 		System.out.println("Iridis transformation complete!");
 	}
 
+	/**
+	 * only works with interface methods
+	 */
 	public static String getMinecraftFromApi(String apiClassName) {
 		return API_TO_MC.getOrDefault(apiClassName, apiClassName);
 	}

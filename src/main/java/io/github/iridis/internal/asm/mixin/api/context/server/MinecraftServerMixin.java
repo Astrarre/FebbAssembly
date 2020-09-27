@@ -2,40 +2,37 @@ package io.github.iridis.internal.asm.mixin.api.context.server;
 
 import java.util.function.BooleanSupplier;
 
-import io.github.iridis.api.context.ContextManager;
-import org.spongepowered.asm.mixin.Final;
+import io.github.iridis.api.context.DefaultContext;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.WorldGenerationProgressListenerFactory;
 import net.minecraft.server.world.ServerWorld;
 
-@Mixin(MinecraftServer.class)
+@Mixin(value = MinecraftServer.class, priority = Integer.MIN_VALUE) // we want to be the last tail so we don't end up with memory leaks
 public class MinecraftServerMixin {
 
 	@Inject (method = "runServer", at = @At("HEAD"))
 	private void pushContext(CallbackInfo ci) {
-		ContextManager.getInstance().push("server", this);
-		ContextManager.getInstance().pushStackMarker();
+		DefaultContext.SERVER.get().push("server", this);
+		DefaultContext.SERVER.get().pushStackMarker();
 	}
 
 	@Inject (method = "runServer", at = @At("TAIL"))
 	private void popContext(CallbackInfo ci) {
-		ContextManager.getInstance().popStackMarker();
-		ContextManager.getInstance().pop("server", this);
+		DefaultContext.SERVER.get().popStackMarker();
+		DefaultContext.SERVER.get().pop("server", this);
 	}
 
 	@Redirect(method = "tickWorlds", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;tick(Ljava/util/function/BooleanSupplier;)V"))
 	private void tick(ServerWorld world, BooleanSupplier shouldKeepTicking) {
-		ContextManager.getInstance().push("worldTick", world);
-		ContextManager.getInstance().pushStackMarker();
+		DefaultContext.SERVER.get().push("worldTick", world);
+		DefaultContext.SERVER.get().pushStackMarker();
 		world.tick(shouldKeepTicking);
-		ContextManager.getInstance().popStackMarker();
-		ContextManager.getInstance().pop("worldTick", world);
+		DefaultContext.SERVER.get().popStackMarker();
+		DefaultContext.SERVER.get().pop("worldTick", world);
 	}
 }

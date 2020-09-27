@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
 import net.devtech.nanoevents.util.Id;
 import v1_16_1.net.minecraft.nbt.ICompoundTag;
 
@@ -36,6 +37,8 @@ public class Data {
 		 * the return type of this function doesn't need to be the same as the original type, for example, authentic PlayerEntities can't always be
 		 * guaranteed to exist at read time, for example if a player leaves some data in the ContextManager, then leaves the game, the reader has the
 		 * freedom to deserialize it as an OfflinePlayer, instead of a PlayerEntity
+		 *
+		 * @see io.github.iridis.api.context.DefaultContext#SERVER
 		 */
 		Object from(ContextManager manager, ICompoundTag data);
 	}

@@ -1,6 +1,7 @@
 package io.github.iridis.internal.api.data;
 
-import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
+import io.github.iridis.api.context.DefaultContext;
 import io.github.iridis.api.data.Data;
 import io.github.iridis.api.data.NBTag;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -45,7 +46,7 @@ public class Serialization {
 			CompoundTag data = tags.getCompound(i);
 			Id id = new Id(data.getString("ser_modid"), data.getString("ser_value"));
 			Data.Readable readable = Data.get(id);
-			Object obj = readable.from(ContextManager.getInstance(), (ICompoundTag) data);
+			Object obj = readable.from(DefaultContext.SERVER.get(), (ICompoundTag) data);
 			list.set(i, obj);
 		}
 		return list;

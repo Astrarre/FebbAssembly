@@ -2,7 +2,7 @@ package io.github.iridis.api.entity;
 
 import java.util.UUID;
 
-import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
 import v1_16_1.net.minecraft.entity.IEntity;
 import v1_16_1.net.minecraft.server.IMinecraftServer;
 import v1_16_1.net.minecraft.server.world.IServerWorld;
@@ -17,10 +17,11 @@ public interface UUIDEntity {
 	UUID getId();
 
 	static UUIDEntity get(UUID uuid, boolean player) {
-		if(player)
+		if (player) {
 			return Player.get(uuid);
-		IMinecraftServer server = ContextManager.getInstance()
-		                                        .peekFirstOfType(IMinecraftServer.class);
+		}
+
+		IMinecraftServer server = DefaultContext.SERVER.get().peekFirstOfType(IMinecraftServer.class);
 		if (server == null) {
 			return () -> uuid;
 		}

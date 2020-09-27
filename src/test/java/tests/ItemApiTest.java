@@ -20,15 +20,13 @@ public class ItemApiTest {
 	@Before
 	public void before() {
 		Bootstrap.initialize();
-//		item = IRegistry.register(IRegistry.getITEM(),
-//		                          IIdentifier.create("mymod", "myitem"),
-//		                          IItem.create(IItem.Settings.create()
-//		                                                     .burnTime(10)));
-		System.out.println("help");
+		item = IRegistry.register(IRegistry.getITEM(),
+		                          IIdentifier.create("mymod", "myitem"),
+		                          IItem.create(IItem.Settings.create()
+		                                                     .burnTime(10)));
 	}
 
 	@Test
-	@Ignore
 	public void burnTime() {
 		Assert.assertEquals((int)AbstractFurnaceBlockEntity.createFuelTimeMap().get(item), 10);
 	}

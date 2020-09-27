@@ -1,48 +1,47 @@
-[22:19:36] [Test worker/INFO]: Loading for game Minecraft 1.16.1
-[22:19:37] [Test worker/INFO]: [FabricLoader] Loading 44 mods: minecraft@1.16.1, fabric-screen-handler-api-v1@1.1.0+97324d1102, fabric-networking-blockentity-v0@0.2.5+b50ffc7b02, fabric-renderer-api-v1@0.2.13+eae12eb802, fabric-keybindings-v0@0.2.0+3fa9f7c502, fabric-command-api-v1@1.0.8+5ce5339802, fabricloader@0.8.9+build.203, iridis-impl-fabric@1.16.1+21-28, fabric-tool-attribute-api-v1@1.2.0+55e0cc5f02, fabric-renderer-indigo@0.3.4+34d6c87102, fabric-containers-v0@0.1.8+045df74f02, fabric-dimensions-v1@1.0.0+a71b305302, fabric-object-builder-api-v1@1.5.6+a2d21ddd02, fabric-biomes-v1@0.2.7+059ea86602, fabric-item-api-v1@1.0.0+16acbe5b02, fabric-crash-report-info-v1@0.1.2+b7f9825d02, fabric-events-interaction-v0@0.3.3+7066030f02, nanoevents@3.0.6, fabric-game-rule-api-v1@1.0.0+fe81e12502, fabric-api-base@0.1.3+12a8474c02, fabric-rendering-v0@1.1.0+5341049002, fabric-key-binding-api-v1@1.0.1+f404f3be02, fabric-rendering-v1@1.1.2+346247d702, fabric-rendering-data-attachment-v1@0.1.3+b7f9825d02, mm@2.0.1, fabric-resource-loader-v0@0.2.6+f41e209802, fabric-textures-v0@1.0.4+eae12eb802, fabric-content-registries-v0@0.1.9+059ea86602, fabric-tag-extensions-v0@0.2.7+a4c57d8e02, fabric-rendering-fluids-v1@0.1.8+b7084faa02, fabric-registry-sync-v0@0.3.8+7dba2d6c02, fabric-commands-v0@0.2.0+52d3083602, fabric-blockrenderlayer-v1@1.1.4+c6a8ea8902, fabric-lifecycle-events-v1@1.2.0+e83e061c02, fabric-mining-levels-v0@0.1.2+b764ce9902, fabric-renderer-registries-v1@2.0.1+5a0f9a6002, fabric-loot-tables-v1@1.0.0+386eb69e02, fabric-events-lifecycle-v0@0.2.0+16acbe5b02, fabric@0.16.2+build.385-1.16.1, fabric-particles-v1@0.2.1+0a6f2a7002, fabric-models-v0@0.1.0+dfdb52d602, fabric-item-groups-v0@0.2.0+438f963602, fabric-networking-v0@0.1.10+e00ecb5f02, fabric-object-builders-v0@0.6.1+a2d21ddd02
-[22:19:37] [Test worker/INFO]: SpongePowered MIXIN Subsystem Version=0.8 Source=file:/C:/Users/natan/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.8+build.18/af077ad2845a00cde186fa2c99c4dd32bd2a2766/sponge-mixin-0.8+build.18.jar Service=Launchwrapper/Fabric Env=SERVER
-[22:19:37] [Test worker/INFO]: Loaded Fabric development mappings for mixin remapper!
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-networking-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-networking-blockentity-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-biomes-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-screen-handler-api-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-lifecycle-events-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-containers-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-rendering-data-attachment-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-item-api-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-events-interaction-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-loot-tables-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-object-builder-api-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-dimensions-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-registry-sync-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-containers-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap mixins.mm.refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-resource-loader-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-game-rule-api-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-particles-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-object-builders-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-tag-extensions-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-tool-attribute-api-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-item-groups-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-content-registries-v0-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-command-api-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/INFO]: Remapping refMap fabric-crash-report-info-v1-refmap.json using remapper chain
-[22:19:38] [Test worker/WARN]: @Mixin target net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker is public in fabric-networking-v0.mixins.json:MixinEntityTracker and should be specified in value
-[22:19:38] [Test worker/WARN]: @Mixin target net/minecraft/server/command/GameRuleCommand$1 is public in fabric-game-rule-api-v1.mixins.json:GameRuleCommandVisitorMixin and should be specified in value
-[22:19:38] [Test worker/WARN]: @Mixin target net/minecraft/tag/Tag$1 is public in fabric-tag-extensions-v0.mixins.json:MixinTagImpl and should be specified in value
-[22:19:39] [Test worker/WARN]: Error loading class: net/minecraft/client/network/AbstractClientPlayerEntity (java.lang.RuntimeException: Cannot load class net.minecraft.client.network.AbstractClientPlayerEntity in environment type SERVER)
-[22:19:39] [Test worker/WARN]: @Mixin target net.minecraft.client.network.AbstractClientPlayerEntity was not found mixins.mm.json:net/minecraft/client/network/AbstractClientPlayerEntity
-[22:19:39] [Test worker/WARN]: Error loading class: net/minecraft/client/network/OtherClientPlayerEntity (java.lang.RuntimeException: Cannot load class net.minecraft.client.network.OtherClientPlayerEntity in environment type SERVER)
-[22:19:39] [Test worker/WARN]: @Mixin target net.minecraft.client.network.OtherClientPlayerEntity was not found mixins.mm.json:net/minecraft/client/network/OtherClientPlayerEntity
-[22:19:39] [Test worker/WARN]: Error loading class: net/minecraft/client/network/ClientPlayerEntity (java.lang.RuntimeException: Cannot load class net.minecraft.client.network.ClientPlayerEntity in environment type SERVER)
-[22:19:39] [Test worker/WARN]: @Mixin target net.minecraft.client.network.ClientPlayerEntity was not found mixins.mm.json:net/minecraft/client/network/ClientPlayerEntity
-[22:19:39] [Test worker/WARN]: Error loading class: net/minecraft/client/util/ModelIdentifier (java.lang.RuntimeException: Cannot load class net.minecraft.client.util.ModelIdentifier in environment type SERVER)
-[22:19:39] [Test worker/WARN]: @Mixin target net.minecraft.client.util.ModelIdentifier was not found mixins.mm.json:net/minecraft/client/util/ModelIdentifier
-[22:19:39] [Test worker/WARN]: Error loading class: net/minecraft/client/world/ClientWorld (java.lang.RuntimeException: Cannot load class net.minecraft.client.world.ClientWorld in environment type SERVER)
-[22:19:39] [Test worker/WARN]: @Mixin target net.minecraft.client.world.ClientWorld was not found mixins.mm.json:net/minecraft/client/world/ClientWorld
-[22:19:39] [Test worker/WARN]: Error loading class: net/minecraft/server/integrated/IntegratedPlayerManager (java.lang.RuntimeException: Cannot load class net.minecraft.server.integrated.IntegratedPlayerManager in environment type SERVER)
-[22:19:39] [Test worker/WARN]: @Mixin target net.minecraft.server.integrated.IntegratedPlayerManager was not found mixins.mm.json:net/minecraft/server/integrated/IntegratedPlayerManager
-[22:19:39] [Test worker/WARN]: Error loading class: net/minecraft/server/integrated/IntegratedServer (java.lang.RuntimeException: Cannot load class net.minecraft.server.integrated.IntegratedServer in environment type SERVER)
-[22:19:39] [Test worker/WARN]: @Mixin target net.minecraft.server.integrated.IntegratedServer was not found mixins.mm.json:net/minecraft/server/integrated/IntegratedServer
-[22:19:39] [Test worker/WARN]: Error loading class: net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen$CreativeScreenHandler (java.lang.RuntimeException: Cannot load class net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen$CreativeScreenHandler in environment type SERVER)
-[22:19:39] [Test worker/WARN]: @Mixin target net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen$CreativeScreenHandler was not found mixins.mm.json:net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen$CreativeScreenHandler
+[20:06:54] [Test worker/INFO]: [FabricLoader] Loading 44 mods: fabric-screen-handler-api-v1@1.1.0+97324d1102, minecraft@1.16.1, fabric-networking-blockentity-v0@0.2.5+b50ffc7b02, fabric-renderer-api-v1@0.2.13+eae12eb802, fabric-keybindings-v0@0.2.0+3fa9f7c502, fabric-command-api-v1@1.0.8+5ce5339802, fabricloader@0.8.9+build.203, iridis-impl-fabric@1.16.1+21-28, fabric-tool-attribute-api-v1@1.2.0+55e0cc5f02, fabric-renderer-indigo@0.3.4+34d6c87102, fabric-containers-v0@0.1.8+045df74f02, fabric-object-builder-api-v1@1.5.6+a2d21ddd02, fabric-dimensions-v1@1.0.0+a71b305302, fabric-biomes-v1@0.2.7+059ea86602, fabric-events-interaction-v0@0.3.3+7066030f02, nanoevents@3.0.6, fabric-crash-report-info-v1@0.1.2+b7f9825d02, fabric-item-api-v1@1.0.0+16acbe5b02, fabric-game-rule-api-v1@1.0.0+fe81e12502, fabric-api-base@0.1.3+12a8474c02, fabric-rendering-v0@1.1.0+5341049002, fabric-rendering-v1@1.1.2+346247d702, fabric-key-binding-api-v1@1.0.1+f404f3be02, mm@2.0.1, fabric-rendering-data-attachment-v1@0.1.3+b7f9825d02, fabric-resource-loader-v0@0.2.6+f41e209802, fabric-textures-v0@1.0.4+eae12eb802, fabric-content-registries-v0@0.1.9+059ea86602, fabric-tag-extensions-v0@0.2.7+a4c57d8e02, fabric-rendering-fluids-v1@0.1.8+b7084faa02, fabric-registry-sync-v0@0.3.8+7dba2d6c02, fabric-commands-v0@0.2.0+52d3083602, fabric-blockrenderlayer-v1@1.1.4+c6a8ea8902, fabric-lifecycle-events-v1@1.2.0+e83e061c02, fabric-mining-levels-v0@0.1.2+b764ce9902, fabric-renderer-registries-v1@2.0.1+5a0f9a6002, fabric-events-lifecycle-v0@0.2.0+16acbe5b02, fabric-loot-tables-v1@1.0.0+386eb69e02, fabric@0.16.2+build.385-1.16.1, fabric-item-groups-v0@0.2.0+438f963602, fabric-particles-v1@0.2.1+0a6f2a7002, fabric-models-v0@0.1.0+dfdb52d602, fabric-networking-v0@0.1.10+e00ecb5f02, fabric-object-builders-v0@0.6.1+a2d21ddd02
+[20:06:54] [Test worker/INFO]: SpongePowered MIXIN Subsystem Version=0.8 Source=file:/C:/Users/devan/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.8+build.18/af077ad2845a00cde186fa2c99c4dd32bd2a2766/sponge-mixin-0.8+build.18.jar Service=Launchwrapper/Fabric Env=SERVER
+[20:06:54] [Test worker/INFO]: Loaded Fabric development mappings for mixin remapper!
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-networking-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-networking-blockentity-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-biomes-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-screen-handler-api-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-lifecycle-events-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-containers-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-rendering-data-attachment-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-events-interaction-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-item-api-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-loot-tables-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-object-builder-api-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-dimensions-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-registry-sync-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-containers-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap mixins.mm.refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-resource-loader-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-game-rule-api-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-particles-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-object-builders-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-tag-extensions-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-tool-attribute-api-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-item-groups-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-content-registries-v0-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-command-api-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/INFO]: Remapping refMap fabric-crash-report-info-v1-refmap.json using remapper chain
+[20:06:54] [Test worker/WARN]: @Mixin target net/minecraft/server/world/ThreadedAnvilChunkStorage$EntityTracker is public in fabric-networking-v0.mixins.json:MixinEntityTracker and should be specified in value
+[20:06:55] [Test worker/WARN]: @Mixin target net/minecraft/server/command/GameRuleCommand$1 is public in fabric-game-rule-api-v1.mixins.json:GameRuleCommandVisitorMixin and should be specified in value
+[20:06:55] [Test worker/WARN]: @Mixin target net/minecraft/tag/Tag$1 is public in fabric-tag-extensions-v0.mixins.json:MixinTagImpl and should be specified in value
+[20:06:55] [Test worker/WARN]: Error loading class: net/minecraft/client/network/AbstractClientPlayerEntity (java.lang.RuntimeException: Cannot load class net.minecraft.client.network.AbstractClientPlayerEntity in environment type SERVER)
+[20:06:55] [Test worker/WARN]: @Mixin target net.minecraft.client.network.AbstractClientPlayerEntity was not found mixins.mm.json:net/minecraft/client/network/AbstractClientPlayerEntity
+[20:06:55] [Test worker/WARN]: Error loading class: net/minecraft/client/network/OtherClientPlayerEntity (java.lang.RuntimeException: Cannot load class net.minecraft.client.network.OtherClientPlayerEntity in environment type SERVER)
+[20:06:55] [Test worker/WARN]: @Mixin target net.minecraft.client.network.OtherClientPlayerEntity was not found mixins.mm.json:net/minecraft/client/network/OtherClientPlayerEntity
+[20:06:55] [Test worker/WARN]: Error loading class: net/minecraft/client/network/ClientPlayerEntity (java.lang.RuntimeException: Cannot load class net.minecraft.client.network.ClientPlayerEntity in environment type SERVER)
+[20:06:55] [Test worker/WARN]: @Mixin target net.minecraft.client.network.ClientPlayerEntity was not found mixins.mm.json:net/minecraft/client/network/ClientPlayerEntity
+[20:06:55] [Test worker/WARN]: Error loading class: net/minecraft/client/util/ModelIdentifier (java.lang.RuntimeException: Cannot load class net.minecraft.client.util.ModelIdentifier in environment type SERVER)
+[20:06:55] [Test worker/WARN]: @Mixin target net.minecraft.client.util.ModelIdentifier was not found mixins.mm.json:net/minecraft/client/util/ModelIdentifier
+[20:06:56] [Test worker/WARN]: Error loading class: net/minecraft/client/world/ClientWorld (java.lang.RuntimeException: Cannot load class net.minecraft.client.world.ClientWorld in environment type SERVER)
+[20:06:56] [Test worker/WARN]: @Mixin target net.minecraft.client.world.ClientWorld was not found mixins.mm.json:net/minecraft/client/world/ClientWorld
+[20:06:56] [Test worker/WARN]: Error loading class: net/minecraft/server/integrated/IntegratedPlayerManager (java.lang.RuntimeException: Cannot load class net.minecraft.server.integrated.IntegratedPlayerManager in environment type SERVER)
+[20:06:56] [Test worker/WARN]: @Mixin target net.minecraft.server.integrated.IntegratedPlayerManager was not found mixins.mm.json:net/minecraft/server/integrated/IntegratedPlayerManager
+[20:06:56] [Test worker/WARN]: Error loading class: net/minecraft/server/integrated/IntegratedServer (java.lang.RuntimeException: Cannot load class net.minecraft.server.integrated.IntegratedServer in environment type SERVER)
+[20:06:56] [Test worker/WARN]: @Mixin target net.minecraft.server.integrated.IntegratedServer was not found mixins.mm.json:net/minecraft/server/integrated/IntegratedServer
+[20:06:56] [Test worker/WARN]: Error loading class: net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen$CreativeScreenHandler (java.lang.RuntimeException: Cannot load class net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen$CreativeScreenHandler in environment type SERVER)
+[20:06:56] [Test worker/WARN]: @Mixin target net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen$CreativeScreenHandler was not found mixins.mm.json:net/minecraft/client/gui/screen/ingame/CreativeInventoryScreen$CreativeScreenHandler

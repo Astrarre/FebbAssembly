@@ -1,9 +1,8 @@
 package io.github.iridis.internal.asm.mixin.api.context.interact;
 
 import static io.github.iridis.api.context.ContextKey.of;
-import static io.github.iridis.api.context.ContextManager.INSTANCE;
 
-import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,29 +30,30 @@ public class ServerPlayerInteractionManagerMixin {
 			at = @At (value = "INVOKE",
 					target = "Lnet/minecraft/item/ItemStack;useOnBlock(Lnet/minecraft/item/ItemUsageContext;)Lnet/minecraft/util/ActionResult;"))
 	private ActionResult useOnBlock(ItemStack stack, ItemUsageContext context) {
-		ContextManager.getInstance().pushStackMarker();
-		ActionResult result = ContextManager.getInstance().act(() -> stack.useOnBlock(context),
-		             of("interactContext", context),
-		             of("interactPos", context.getBlockPos()),
-		             of("interactHand", context.getHand()),
-		             of("exactInteractPos", context.getHitPos()),
-		             of("interactPlayer", context.getPlayer()),
-		             of("interactItem", context.getStack()));
-		ContextManager.getInstance().popStackMarker();
+		DefaultContext.BLAME.get().pushStackMarker();
+		ActionResult result = DefaultContext.BLAME.get().act(() -> stack.useOnBlock(context),
+		                                                                                 of("interactContext", context),
+		                                                                                 of("interactPos", context.getBlockPos()),
+		                                                                                 of("interactHand", context.getHand()),
+		                                                                                 of("exactInteractPos", context.getHitPos()),
+		                                                                                 of("interactPlayer", context.getPlayer()),
+		                                                                                 of("interactItem", context.getStack()));
+		DefaultContext.BLAME.get().popStackMarker();
 		return result;
 	}
 
 	@Redirect (method = "interactBlock",
 			at = @At (value = "INVOKE",
-					target = "Lnet/minecraft/block/BlockState;onUse(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;"))
+					target =
+							"Lnet/minecraft/block/BlockState;onUse(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;"))
 	private ActionResult useOnBlock(BlockState state, World world, PlayerEntity player, Hand hand, BlockHitResult hit) {
-		ContextManager.getInstance().pushStackMarker();
-		ActionResult result = ContextManager.getInstance().act(() -> state.onUse(world, player, hand, hit),
-		                                   of("useContext", hit),
-		                                   of("usePos", hit.getBlockPos()),
-		                                   of("useHand", hand),
-		                                   of("usePlayer", player));
-		ContextManager.getInstance().popStackMarker();
+		DefaultContext.BLAME.get().pushStackMarker();
+		ActionResult result = DefaultContext.BLAME.get().act(() -> state.onUse(world, player, hand, hit),
+		                                                                                 of("useContext", hit),
+		                                                                                 of("usePos", hit.getBlockPos()),
+		                                                                                 of("useHand", hand),
+		                                                                                 of("usePlayer", player));
+		DefaultContext.BLAME.get().popStackMarker();
 		return result;
 	}
 }

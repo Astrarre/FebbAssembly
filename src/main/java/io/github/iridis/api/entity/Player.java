@@ -3,7 +3,7 @@ package io.github.iridis.api.entity;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
-import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
 import io.github.iridis.api.entity.player.OfflinePlayer;
 import v1_16_1.net.minecraft.entity.player.IPlayerEntity;
 import v1_16_1.net.minecraft.server.IMinecraftServer;
@@ -32,7 +32,7 @@ public interface Player extends UUIDEntity {
 	 * get the online or offline player for the uuid
 	 */
 	static Player get(UUID uuid) {
-		IMinecraftServer server = ContextManager.getInstance().peekFirstOfType(IMinecraftServer.class);
+		IMinecraftServer server = DefaultContext.SERVER.get().peekFirstOfType(IMinecraftServer.class);
 		if (server == null) {
 			return new OfflinePlayer(new GameProfile(uuid, null));
 		}

@@ -2,7 +2,8 @@ package io.github.iridis.internal.asm.mixin.api.context.scheduledtick;
 
 import java.util.Random;
 
-import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
+import io.github.iridis.api.context.DefaultContext;
 import io.github.iridis.internal.asm.access.ContextHolderAccess;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,7 +24,7 @@ public class ServerWorldMixin {
 	@Redirect (method = "tickBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;scheduledTick(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V"))
 	private void scheduled(BlockState state, ServerWorld world, BlockPos pos, Random random, ScheduledTick<Block> tick) {
 		ObjectArrayList<Object> objects = ((ContextHolderAccess)tick).getContext();
-		ContextManager.getInstance()
+		DefaultContext.BLAME.get()
 		              .actStack(objects, () -> {
 			state.scheduledTick(world, pos, random);
 			return null;
@@ -33,7 +34,7 @@ public class ServerWorldMixin {
 	@Redirect (method = "tickFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/fluid/FluidState;onScheduledTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
 	private void scheduled(FluidState state, World world, BlockPos pos, ScheduledTick<Fluid> tick) {
 		ObjectArrayList<Object> objects = ((ContextHolderAccess)tick).getContext();
-		ContextManager.getInstance()
+		DefaultContext.BLAME.get()
 		              .actStack(objects, () -> {
 			              state.onScheduledTick(world, pos);
 			              return null;

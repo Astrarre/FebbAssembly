@@ -2,19 +2,25 @@ package io.github.iridis.api.context;
 
 import java.util.Objects;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 @SuppressWarnings ("unchecked")
 public class ContextManager {
-	public static final ThreadLocal<ContextManager> INSTANCE = ThreadLocal.withInitial(ContextManager::new);
-
 	private enum StackMarker {INSTANCE}
-	// todo type sorting list for speed
+	private static final Logger LOGGER = Logger.getLogger(ContextManager.class.getSimpleName());
 	private final ObjectArrayList<Object> context = new ObjectArrayList<>();
 
-	public static ContextManager getInstance() {
-		return INSTANCE.get();
+	/**
+	 * check for memory leaks, don't call this all the time the check is pretty naive
+	 */
+	public void audit() {
+		if(this.context.size() > 1000) {
+			LOGGER.warning("=== Potential Memory leak detected! ===");
+			this.printStack();
+			LOGGER.warning("=== Potential Memory leak detected! ===");
+		}
 	}
 
 	/**
@@ -180,7 +186,8 @@ public class ContextManager {
 
 	public void printStack() {
 		for (Object o : this.context) {
-			System.out.println(o);
+			// todo logger
+			LOGGER.info(o+"");
 		}
 	}
 }

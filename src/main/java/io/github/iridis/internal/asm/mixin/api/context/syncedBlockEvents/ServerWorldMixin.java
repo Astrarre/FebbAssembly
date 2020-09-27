@@ -1,6 +1,6 @@
 package io.github.iridis.internal.asm.mixin.api.context.syncedBlockEvents;
 
-import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
 import io.github.iridis.internal.asm.access.ContextHolderAccess;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,12 +17,12 @@ import net.minecraft.world.World;
 public class ServerWorldMixin {
 	@ModifyArg(method = "addSyncedBlockEvent", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/objects/ObjectLinkedOpenHashSet;add(Ljava/lang/Object;)Z"))
 	private Object add(Object object) {
-		((ContextHolderAccess)object).setContext(ContextManager.getInstance().copyStack());
+		((ContextHolderAccess)object).setContext(DefaultContext.BLAME.get().copyStack());
 		return object;
 	}
 
 	@Redirect (method = "processBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;onSyncedBlockEvent(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;II)Z"))
 	private boolean process(BlockState state, World world, BlockPos pos, int type, int data, BlockEvent event) {
-		return ContextManager.getInstance().actStack(((ContextHolderAccess)event).getContext(), () -> state.onSyncedBlockEvent(world, pos, type, data));
+		return DefaultContext.BLAME.get().actStack(((ContextHolderAccess)event).getContext(), () -> state.onSyncedBlockEvent(world, pos, type, data));
 	}
 }

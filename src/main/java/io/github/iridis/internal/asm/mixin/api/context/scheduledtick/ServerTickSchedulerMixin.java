@@ -1,6 +1,6 @@
 package io.github.iridis.internal.asm.mixin.api.context.scheduledtick;
 
-import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
 import io.github.iridis.internal.asm.access.ContextHolderAccess;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,7 +23,7 @@ public abstract class ServerTickSchedulerMixin {
 	@Redirect (method = "schedule", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerTickScheduler;addScheduledTick(Lnet/minecraft/world/ScheduledTick;)V"))
 	private <T> void addContext(ServerTickScheduler<T> scheduler, ScheduledTick<T> scheduledTick) {
 		((ContextHolderAccess)scheduledTick).setContext(
-		                                                ContextManager.getInstance()
+		                                                DefaultContext.BLAME.get()
 		                                                              .copyStack());
 		this.addScheduledTick(scheduledTick);
 	}

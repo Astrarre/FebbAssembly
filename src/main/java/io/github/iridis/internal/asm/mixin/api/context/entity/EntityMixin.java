@@ -1,6 +1,7 @@
 package io.github.iridis.internal.asm.mixin.api.context.entity;
 
 import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
 import io.github.iridis.internal.api.data.Serialization;
 import io.github.iridis.internal.asm.access.ContextHolderAccess;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -63,7 +64,7 @@ public abstract class EntityMixin implements ContextHolderAccess {
 					target = "Lnet/minecraft/entity/Entity;fall(DZLnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)V"))
 	private void move(Entity entity, double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition, MovementType type,
 	                  Vec3d movement) {
-		ContextManager manager = ContextManager.getInstance();
+		ContextManager manager = DefaultContext.BLAME.get();
 		manager.push("entityFall", this);
 		manager.actStack(((ContextHolderAccess) this).getContext(), () -> {
 			this.fall(heightDifference, onGround, landedState, landedPosition);
@@ -75,7 +76,7 @@ public abstract class EntityMixin implements ContextHolderAccess {
 	@Redirect (method = "move",
 			at = @At (value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityLand(Lnet/minecraft/world/BlockView;Lnet/minecraft/entity/Entity;)V"))
 	private void move(Block block, BlockView world, Entity entity, MovementType type, Vec3d movement) {
-		ContextManager manager = ContextManager.getInstance();
+		ContextManager manager = DefaultContext.BLAME.get();
 		manager.push("entityLand", this);
 		manager.actStack(((ContextHolderAccess) this).getContext(), () -> {
 			block.onEntityLand(world, entity);
@@ -89,7 +90,7 @@ public abstract class EntityMixin implements ContextHolderAccess {
 					target = "Lnet/minecraft/block/Block;onSteppedOn(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;" + "Lnet/minecraft" +
 					         "/entity/Entity;)V"))
 	private void move(Block block, World world, BlockPos pos, Entity entity, MovementType type, Vec3d movement) {
-		ContextManager manager = ContextManager.getInstance();
+		ContextManager manager = DefaultContext.BLAME.get();
 		manager.push("entityStep", this);
 		manager.actStack(((ContextHolderAccess) this).getContext(), () -> {
 			block.onSteppedOn(world, pos, entity);
@@ -100,7 +101,7 @@ public abstract class EntityMixin implements ContextHolderAccess {
 
 	@Redirect (method = "move", at = @At (value = "INVOKE", target = "Lnet/minecraft/entity/Entity;checkBlockCollision()V"))
 	private void move(Entity entity, MovementType type, Vec3d movement) {
-		ContextManager manager = ContextManager.getInstance();
+		ContextManager manager = DefaultContext.BLAME.get();
 		manager.push("entityCollide", this);
 		manager.actStack(((ContextHolderAccess) this).getContext(), () -> {
 			this.checkBlockCollision();

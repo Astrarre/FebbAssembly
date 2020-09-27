@@ -1,6 +1,6 @@
 package io.github.iridis.internal.asm.mixin.api.context.blockentity;
 
-import io.github.iridis.api.context.ContextManager;
+import io.github.iridis.api.context.DefaultContext;
 import io.github.iridis.internal.asm.access.ContextHolderAccess;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,14 +19,14 @@ public class WorldMixin {
 	@Inject(method = "setBlockEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEntity(Lnet/minecraft/block/entity/BlockEntity;)Z"))
 	private void context(BlockPos pos, @Nullable BlockEntity blockEntity, CallbackInfo ci) {
 		if(blockEntity != null) {
-			((ContextHolderAccess) blockEntity).setContext(ContextManager.getInstance()
+			((ContextHolderAccess) blockEntity).setContext(DefaultContext.BLAME.get()
 			                                                                               .copyStack());
 		}
 	}
 
 	@Redirect(method = "tickBlockEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Tickable;tick()V"))
 	private void stack(Tickable tickable) {
-		ContextManager.getInstance()
+		DefaultContext.BLAME.get()
 		              .actStack(((ContextHolderAccess)tickable).getContext(), () -> {
 			tickable.tick();
 			return null;
